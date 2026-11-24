@@ -1,0 +1,1329 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Relevés frigo vaccins</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@100;300;400;500;600;700;800;900&display=swap">
+<style>
+/* Layout: powder-blue cards without borders on a white page, Mystic Navy type, one column for a phone at the fridge door. Orange appears only on the gauge arc and the active tab; selections use navy outlines; out-of-range uses red with an icon and a label. */
+:root {
+  --c0: #0d1b2c; --c1: #13273f;  /* Mystic Navy: ink and actions */
+  --c2: #2f4a6b; --c3: #7d8fa6; --c4: #a9b6c6; --c5: #dfe5ec;
+  --hi: #f2762e;  /* orange: used sparingly (gauge arc, active tab) */
+  --hi-soft: #fef0e7;
+  --bg: #ffffff; --surface: #eaf0f7; --soft: #ffffff; --soft-2: #d5dfeb; --line: #d3dde9;
+  --ink: #13273f; --ink-2: #4f6178; --ink-3: #66788f;
+  --accent: #13273f; --accent-ink: #ffffff;
+  --band: rgba(125,143,166,.16); --band-edge: #a9b6c6;
+  --s-matin: #13273f; --s-soir: #7d8fa6;
+  --ok: #17734a; --ok-bg: #e2f3ea; --warn: #8a5a00; --warn-bg: #fcf0d6; --crit: #c41d16; --crit-bg: #fde6e4;
+  --f-display: "Albert Sans", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Albert Sans", "Segoe UI", system-ui, sans-serif;
+  --f-data: "Albert Sans", "Helvetica Neue", Arial, sans-serif;
+  --r: 24px;
+  --shadow: none;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); }
+body { color: var(--ink); font-family: var(--f-body); font-feature-settings: "tnum"; font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 780px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 56px; display: grid; gap: 18px; }
+h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; }
+h1 { font-family: var(--f-data); font-size: .92rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
+h2 { font-family: var(--f-data); font-size: .74rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-2); }
+h3 { font-size: 1.05rem; font-weight: 700; }
+p { margin: 0; }
+.mono { font-family: var(--f-data); font-variant-numeric: tabular-nums; }
+.label { font-family: var(--f-data); font-size: .67rem; text-transform: uppercase; letter-spacing: .16em; color: var(--ink-2); font-weight: 500; }
+.muted { color: var(--ink-2); }
+.small { font-size: .86rem; }
+a { color: var(--c1); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--c2); outline-offset: 3px; }
+
+header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand svg { flex: none; color: var(--c1); }
+.brand small { display: block; color: var(--ink-3); font-size: .8rem; margin-top: 2px; }
+.live { font-family: var(--f-data); font-size: .7rem; letter-spacing: .06em; color: var(--ink-3); display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--line); background: var(--surface); border-radius: 99px; }
+.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--c4); display: inline-block; }
+.live.on i { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-bg); }
+
+.zones { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.zone { border: 1.5px solid var(--line); background: var(--surface); border-radius: 99px; padding: 7px 14px; cursor: pointer; font-weight: 500; color: var(--ink-2); display: inline-flex; gap: 8px; align-items: center; }
+.zone .rg { font-family: var(--f-data); font-size: .72rem; color: var(--ink-3); }
+.zone[aria-pressed="true"] { border-color: var(--c1); background: var(--c1); color: #fff; }
+.zone[aria-pressed="true"] .rg { color: var(--c5); }
+
+
+nav.tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--line); padding: 5px; border-radius: 22px; overflow-x: auto; }
+nav.tabs a { flex: 1 0 auto; text-align: center; padding: 10px 14px; border-radius: 17px; text-decoration: none; color: var(--ink-2); font-weight: 500; font-size: .92rem; white-space: nowrap; border: 1.5px solid transparent; }
+nav.tabs a:hover { color: var(--ink); }
+nav.tabs a[aria-current="page"] { background: var(--surface); color: var(--ink); border-color: var(--hi); font-weight: 600; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 22px; display: grid; gap: 16px; min-width: 0; box-shadow: var(--shadow); }
+.view { display: grid; gap: 18px; }
+.view[hidden] { display: none !important; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.between { justify-content: space-between; }
+
+.btn { border: 1px solid var(--c4); background: var(--surface); padding: 9px 16px; border-radius: 99px; cursor: pointer; font-weight: 600; color: var(--c1); font-family: var(--f-data); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+.btn:hover { border-color: var(--c1); }
+.btn.primary { background: var(--c1); color: #fff; border-color: var(--c1); }
+.btn.primary:hover { background: var(--c2); }
+
+.btn.danger { color: var(--crit); border-color: #e6b3b0; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.big { padding: 17px 18px; font-size: .82rem; width: 100%; }
+select.btn { appearance: none; padding-right: 16px; }
+
+/* gauges */
+.hero { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; justify-items: center; }
+.gauge { display: grid; justify-items: center; gap: 8px; }
+.gauge svg { display: block; overflow: visible; }
+.gauge .big { font-family: var(--f-display); font-weight: 300; letter-spacing: -.04em; fill: var(--ink); }
+.gauge .sup { font-family: var(--f-display); font-weight: 700; fill: var(--ink); }
+.gauge .sm { font-family: var(--f-display); font-weight: 700; font-size: 1.15rem; fill: var(--ink); }
+.gauge .glabel { font-family: var(--f-data); font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; fill: var(--ink-2); }
+.hero-sub { text-align: center; color: var(--ink-2); font-size: 1rem; max-width: 38ch; margin: 0 auto; }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 16px 18px; display: grid; gap: 6px; box-shadow: var(--shadow); min-width: 0; }
+.tile .v { font-family: var(--f-display); font-weight: 800; font-size: 1.8rem; letter-spacing: -.02em; line-height: 1.05; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.tile .v small { font-size: .5em; font-weight: 700; margin-left: 3px; color: var(--ink-2); }
+.tile .v.crit { color: var(--crit); }
+.tile .sub { font-size: .78rem; color: var(--ink-3); }
+
+.today { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.slot-card { border: 1px solid var(--line); border-radius: 22px; padding: 16px 18px; display: grid; gap: 6px; background: var(--soft); text-decoration: none; color: inherit; }
+.slot-card:hover { border-color: var(--c4); }
+.slot-head { display: flex; align-items: center; gap: 10px; }
+.ico { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line); color: var(--c1); flex: none; }
+.slot-card .v { font-family: var(--f-display); font-size: 2.2rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.slot-card .v small { font-size: .45em; font-weight: 700; color: var(--ink-2); margin-left: 3px; }
+.slot-card .v.crit { color: var(--crit); }
+.who { font-size: .82rem; color: var(--ink-2); }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-data); font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; padding: 4px 10px; border-radius: 99px; width: fit-content; white-space: nowrap; }
+.pill.ok { background: var(--ok-bg); color: var(--ok); }
+.pill.warn { background: var(--warn-bg); color: var(--warn); }
+.pill.crit { background: var(--crit-bg); color: var(--crit); }
+.pill.none { background: var(--soft-2); color: var(--ink-2); }
+
+.alert { border-radius: 18px; padding: 14px 16px; display: grid; gap: 6px; font-size: .92rem; }
+.alert.crit { background: var(--crit-bg); border: 1px solid #ecb9b5; }
+.alert.crit b { color: var(--crit); }
+.alert.warn { background: var(--warn-bg); border: 1px solid #ecd39d; }
+.alert.info { background: var(--soft); border: 1px solid var(--line); }
+.alert.ok { background: var(--ok-bg); border: 1px solid #b8dcc6; }
+.todo { display: grid; gap: 8px; }
+.todo a { display: flex; gap: 10px; align-items: center; justify-content: space-between; text-decoration: none; color: inherit; padding: 10px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); }
+.todo a:hover { border-color: var(--c4); }
+
+/* forms */
+.ops { display: flex; flex-wrap: wrap; gap: 8px; }
+.op { border: 1.5px solid var(--line); background: var(--surface); padding: 6px 16px 6px 6px; border-radius: 99px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px; color: var(--ink-2); }
+.op:hover { border-color: var(--c4); }
+.op .ini { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--soft-2); font-size: .72rem; font-weight: 600; font-family: var(--f-data); color: var(--c1); }
+.op[aria-pressed="true"] { border-color: var(--c1); color: var(--ink); background: #ffffff; }
+.op[aria-pressed="true"] .ini { background: var(--c1); color: #ffffff; }
+.seg { display: inline-flex; background: var(--soft); border: 1px solid var(--line); border-radius: 18px; padding: 4px; flex-wrap: wrap; }
+.seg button { border: 1.5px solid transparent; background: transparent; padding: 8px 18px; border-radius: 14px; cursor: pointer; font-weight: 500; color: var(--ink-2); }
+.seg button[aria-pressed="true"] { background: #ffffff; color: var(--ink); border-color: var(--c1); font-weight: 600; }
+input[type="date"], .inp { border: 1px solid var(--line); border-radius: 14px; padding: 9px 12px; background: var(--surface); min-width: 0; }
+
+.thermo { display: grid; grid-template-columns: 64px 1fr 64px; gap: 10px; align-items: center; }
+.thermo button { font-size: 1.7rem; font-weight: 500; border-radius: 50%; aspect-ratio: 1; border: 1px solid var(--c4); background: var(--surface); cursor: pointer; color: var(--c1); width: 100%; }
+.thermo button:hover { border-color: var(--c1); }
+.thermo .field { position: relative; }
+.thermo input { width: 100%; text-align: center; font-family: var(--f-display); font-size: 3.3rem; font-weight: 800; letter-spacing: -.03em; padding: 12px 44px 12px 12px; border-radius: 24px; border: 1.5px solid var(--line); background: var(--soft); font-variant-numeric: tabular-nums; }
+.thermo input::placeholder, .inp::placeholder, textarea::placeholder { color: var(--c4); }
+.thermo .unit { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: var(--ink-2); font-family: var(--f-display); font-weight: 700; font-size: 1.2rem; }
+.thermo input.in { border-color: var(--ok); }
+.thermo input.out { border-color: var(--crit); color: var(--crit); }
+.scale { position: relative; height: 30px; margin: 4px 10px 0; }
+.scale .track { position: absolute; left: 0; right: 0; top: 9px; height: 6px; border-radius: 3px; background: var(--soft-2); }
+.scale .ok { position: absolute; top: 9px; height: 6px; background: var(--c4); border-radius: 3px; }
+.scale .mark { position: absolute; top: 3px; width: 18px; height: 18px; background: var(--c1); border: 3px solid #fff; box-shadow: 0 0 0 1px var(--c1); border-radius: 50%; transform: translateX(-9px); transition: left .15s; }
+.scale .tick { position: absolute; top: 18px; font-size: .66rem; color: var(--ink-3); font-family: var(--f-data); transform: translateX(-50%); }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.fld { display: grid; gap: 8px; min-width: 0; }
+.fld input, .fld select, .fld textarea { width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 11px 14px; }
+.fld input.mono { font-family: var(--f-data); }
+.minmax { border: 1px dashed var(--c4); border-radius: 18px; padding: 14px; display: grid; gap: 10px; background: var(--soft); }
+.check { display: flex; gap: 10px; align-items: center; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--c1); }
+
+/* chart */
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .8rem; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 20px; height: 0; border-top: 2px solid; display: inline-block; }
+.sw.band { height: 10px; border: 0; background: var(--band); border-top: 1px dashed var(--band-edge); border-bottom: 1px dashed var(--band-edge); }
+.chart { position: relative; width: 100%; min-width: 0; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font-family: var(--f-data); font-size: 10.5px; fill: var(--ink-3); }
+.tip { position: absolute; pointer-events: none; background: var(--c1); color: #fff; padding: 10px 12px; border-radius: 14px; font-size: .8rem; line-height: 1.45; min-width: 170px; max-width: 260px; box-shadow: 0 8px 24px rgba(26,29,41,.25); z-index: 2; }
+.tip .t { font-weight: 700; margin-bottom: 2px; }
+.tip .l { display: flex; align-items: center; gap: 6px; font-family: var(--f-data); font-size: .74rem; }
+.tip .sw { border-color: #fff; }
+.example-note { font-size: .8rem; color: var(--warn); background: var(--warn-bg); padding: 7px 12px; border-radius: 12px; width: fit-content; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; border-top: 1px solid var(--line); padding-top: 14px; }
+.stat { display: grid; gap: 2px; }
+.stat .v { font-family: var(--f-display); font-size: 1.3rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.strip { display: grid; grid-template-columns: repeat(30, 1fr); gap: 3px; }
+.cell { display: grid; grid-template-rows: 1fr 1fr; gap: 2px; height: 34px; border-radius: 6px; overflow: hidden; position: relative; }
+.cell i { display: block; background: var(--soft-2); }
+.cell i.ok { background: var(--c2); }
+.cell i.out { background: var(--crit); }
+.cell.today { outline: 1.5px solid var(--c1); outline-offset: 2px; }
+.cell b { position: absolute; left: 50%; bottom: -9px; width: 5px; height: 5px; background: var(--c3); transform: translateX(-50%) rotate(45deg); }
+.strip-wrap { padding-bottom: 8px; }
+.strip-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .76rem; color: var(--ink-3); }
+.strip-legend b { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+
+/* tables & lists */
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 18px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+th { font-family: var(--f-data); font-size: .62rem; text-transform: uppercase; letter-spacing: .14em; color: var(--ink-2); background: var(--soft); font-weight: 600; }
+td.num { font-family: var(--f-data); font-variant-numeric: tabular-nums; text-align: right; }
+td.wrap { white-space: normal; min-width: 180px; color: var(--ink-2); }
+tr.out td.num { color: var(--crit); font-weight: 600; }
+.list { display: grid; gap: 8px; }
+.lrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px 10px 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); flex-wrap: wrap; }
+.lrow .main { display: grid; min-width: 0; }
+.valid { border-radius: 20px; padding: 16px 18px; display: grid; gap: 10px; }
+.valid.done { background: var(--ok-bg); border: 1px solid #b8dcc6; }
+.valid.todo-v { background: var(--soft); border: 1px solid var(--line); }
+.stamp { display: flex; align-items: center; gap: 12px; }
+.stamp svg { flex: none; color: var(--ok); }
+.qr { display: grid; justify-items: center; gap: 10px; padding: 22px; border-radius: 24px; border: 2px dashed var(--c4); background: #fff; color: var(--c0); }
+.qr #qrbox img, .qr #qrbox canvas { width: 200px; height: 200px; }
+.qr .qt { font-family: var(--f-display); font-weight: 800; font-size: 1.15rem; }
+.qr .qs { font-size: .85rem; color: var(--c3); text-align: center; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--c1); color: #fff; padding: 12px 18px; border-radius: 99px; font-weight: 600; z-index: 20; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(26,29,41,.3); }
+hr.sep { border: 0; border-top: 1px solid var(--line); margin: 0; width: 100%; }
+
+
+/* powder-blue cards: inner controls sit on white */
+.panel, .tile { border-color: transparent; }
+nav.tabs { background: var(--surface); border-color: transparent; }
+nav.tabs a[aria-current="page"] { background: #ffffff; border-color: var(--hi); }
+.zone { background: var(--surface); border-color: transparent; }
+.zone[aria-pressed="true"] { background: var(--c1); border-color: var(--c1); color: #ffffff; }
+.live { background: var(--surface); border-color: transparent; }
+.btn { background: #ffffff; border-color: var(--line); }
+.btn:hover { border-color: var(--c1); }
+.btn.primary { background: var(--c1); color: #ffffff; border-color: var(--c1); }
+.fld input, .fld select, .fld textarea, .inp, input[type="date"], .op, .thermo button, .lrow, .todo a, .ico, select.btn { background: #ffffff; }
+.slot-card { background: #ffffff; border-color: transparent; }
+.tablewrap { background: #ffffff; border-color: transparent; }
+.minmax { background: #ffffff; border-color: var(--c4); }
+.ico { color: var(--c1); border-color: var(--line); }
+.thermo input { background: #ffffff; }
+.alert.info { background: #ffffff; }
+
+@media (max-width: 560px) {
+  .stats { grid-template-columns: 1fr 1fr; }
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .strip { gap: 2px; }
+  .cell { height: 26px; border-radius: 4px; }
+  .panel { padding: 18px; border-radius: 22px; }
+  .tile { padding: 14px; }
+  .tile .v { font-size: 1.4rem; }
+  .thermo { grid-template-columns: 52px 1fr 52px; }
+  .thermo input { font-size: 2.7rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="5" y="2" width="24" height="30" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><line x1="5" y1="12" x2="29" y2="12" stroke="currentColor" stroke-width="2"/><line x1="9" y1="6" x2="9" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="9" y1="16" x2="9" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 17v7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="19" cy="26" r="2.6" fill="currentColor"/></svg>
+      <div><h1>Relevés frigo vaccins</h1><small id="pharma-lbl">Chaîne du froid · registre des températures</small></div>
+    </div>
+    <div class="live" id="live"><i></i><span>Connexion…</span></div>
+  </header>
+
+  <div class="zones" id="zones" aria-label="Zone réfrigérée"></div>
+
+  <nav class="tabs" aria-label="Sections">
+    <a href="#saisie" data-view="saisie">Saisir</a>
+    <a href="#suivi" data-view="suivi">Suivi 30 jours</a>
+    <a href="#registre" data-view="registre">Registre & rapports</a>
+    <a href="#reglages" data-view="reglages">Réglages</a>
+  </nav>
+
+  <div id="todo-box" class="panel" hidden><h2>À faire</h2><div class="todo" id="todo"></div></div>
+
+  <!-- SAISIE -->
+  <section id="v-saisie" class="view" hidden>
+    <div class="panel">
+      <div class="row between"><h2 id="saisie-zone">Nouvelle saisie</h2><span class="muted mono small" id="nowlbl"></span></div>
+      <div class="fld">
+        <span class="label">Qui saisit ?</span>
+        <div class="ops" id="ops"></div>
+        <div id="ops-empty" class="alert info" hidden>Aucun membre de l'équipe pour l'instant. Ajoutez-vous ici, ou toute l'équipe dans <a href="#reglages">Réglages</a>.
+          <div class="row"><input id="quick-op" class="inp" placeholder="Prénom Nom" style="flex:1"><button type="button" class="btn" id="quick-op-add">Ajouter</button></div>
+        </div>
+      </div>
+      <div class="fld">
+        <span class="label">Type de saisie</span>
+        <div class="seg" role="group" aria-label="Type de saisie">
+          <button type="button" data-mode="temp" id="mode-temp">Relevé de température</button>
+          <button type="button" data-mode="ent" id="mode-ent">Entretien du frigo</button>
+        </div>
+      </div>
+    </div>
+
+    <form class="panel" id="form-temp" novalidate>
+      <div class="fld">
+        <span class="label">Quel relevé ?</span>
+        <div class="row">
+          <div class="seg" role="group" aria-label="Moment du relevé">
+            <button type="button" data-slot="matin" id="slot-matin">Matin</button>
+            <button type="button" data-slot="soir" id="slot-soir">Soir</button>
+          </div>
+          <input type="date" id="f-date" class="mono">
+        </div>
+        <div id="dup" class="alert warn" hidden></div>
+      </div>
+
+      <div class="fld">
+        <label class="label" for="f-temp">Température affichée</label>
+        <div class="thermo">
+          <button type="button" id="minus" aria-label="Diminuer de 0,1 °C">−</button>
+          <div class="field"><input id="f-temp" inputmode="decimal" autocomplete="off" placeholder="5,0"><span class="unit">°C</span></div>
+          <button type="button" id="plus" aria-label="Augmenter de 0,1 °C">+</button>
+        </div>
+        <div class="scale" id="scale" aria-hidden="true"><div class="track"></div><div class="ok" id="sc-ok"></div><div class="mark" id="sc-mark" hidden></div></div>
+      </div>
+
+      <div class="minmax">
+        <div class="row between"><span class="label">Thermomètre mini / maxi</span><span class="muted small">Facultatif</span></div>
+        <div class="grid2">
+          <label class="fld"><span class="muted small">Mini depuis le dernier relevé</span><input id="f-min" class="mono" inputmode="decimal" placeholder="ex. 3,4"></label>
+          <label class="fld"><span class="muted small">Maxi depuis le dernier relevé</span><input id="f-max" class="mono" inputmode="decimal" placeholder="ex. 6,8"></label>
+        </div>
+        <label class="check small"><input type="checkbox" id="f-raz"> Mini / maxi remis à zéro après lecture</label>
+        <div id="mm-out" class="alert warn small" hidden></div>
+      </div>
+
+      <div id="outbox" class="alert crit" hidden>
+        <div><b>Hors plage.</b> Ne délivrez pas les produits concernés avant avis du pharmacien responsable. Isolez-les, vérifiez la fermeture de la porte et l'alimentation, puis notez l'action menée.</div>
+      </div>
+      <label class="fld"><span class="label" id="comment-lbl">Commentaire</span><textarea id="f-comment" rows="2" placeholder="Porte restée ouverte, livraison, dégivrage…"></textarea></label>
+      <button class="btn primary big" id="save" type="submit">Enregistrer le relevé</button>
+      <p class="muted small" id="form-msg"></p>
+    </form>
+
+    <form class="panel" id="form-ent" novalidate hidden>
+      <div class="grid2">
+        <label class="fld"><span class="label">Intervention</span>
+          <select id="e-type"></select></label>
+        <label class="fld"><span class="label">Date</span><input type="date" id="e-date" class="mono"></label>
+      </div>
+      <label class="fld"><span class="label" id="e-comment-lbl">Détails</span><textarea id="e-comment" rows="3" placeholder="Ex. dégivrage complet, produits transférés dans le frigo de secours pendant 40 min."></textarea></label>
+      <button class="btn primary big" id="e-save" type="submit">Enregistrer l'entretien</button>
+      <p class="muted small" id="e-msg"></p>
+    </form>
+  </section>
+
+  <!-- SUIVI -->
+  <section id="v-suivi" class="view" hidden>
+    <div class="panel">
+      <div class="hero" id="hero"></div>
+      <p class="hero-sub" id="hero-sub">Chargement du registre…</p>
+    </div>
+    <div class="tiles" id="tiles"></div>
+    <div class="panel">
+      <div class="row between"><h2>Aujourd'hui</h2><span class="muted mono small" id="todaylbl"></span></div>
+      <div class="today" id="today"></div>
+    </div>
+    <div class="panel">
+      <div class="row between">
+        <h2>30 jours glissants</h2>
+        <div class="legend"><span><i class="sw" style="border-color:var(--s-matin)"></i>Matin</span><span><i class="sw" style="border-color:var(--s-soir);border-top-style:dashed"></i>Soir</span><span><i class="sw band"></i><span id="legend-range">Plage</span></span><span><svg width="10" height="10" aria-hidden="true"><rect x="2" y="2" width="6" height="6" transform="rotate(45 5 5)" fill="var(--c3)"/></svg>Entretien</span></div>
+      </div>
+      <div id="example-note" class="example-note" hidden>Courbe d'exemple : aucun relevé enregistré pour cette zone. Elle disparaît au premier relevé.</div>
+      <div class="chart" id="chart"></div>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="panel">
+      <div class="row between"><h2>Jour par jour</h2><span class="muted small" id="completude"></span></div>
+      <div class="strip-wrap"><div class="strip" id="strip"></div></div>
+      <div class="strip-legend"><span>Haut : matin · Bas : soir</span><span><b style="background:var(--c3)"></b>Conforme</span><span><b style="background:var(--crit)"></b>Hors plage</span><span><b style="background:var(--soft-2)"></b>Manquant</span><span><b style="background:var(--c3);transform:rotate(45deg) scale(.7)"></b>Entretien</span></div>
+    </div>
+  </section>
+
+  <!-- REGISTRE -->
+  <section id="v-registre" class="view" hidden>
+    <div class="panel">
+      <div class="row between">
+        <h2 id="reg-title">Registre</h2>
+        <div class="seg" role="group" aria-label="Période">
+          <button type="button" data-per="mois" id="per-mois">Mois</button>
+          <button type="button" data-per="semaine" id="per-semaine">Semaine</button>
+        </div>
+      </div>
+      <div class="row">
+        <select id="reg-period" class="btn" aria-label="Période affichée" style="flex:1;min-width:0"></select>
+        <button class="btn primary" id="pdf">Rapport PDF</button>
+        <button class="btn" id="csv">CSV</button>
+      </div>
+      <div class="stats" id="reg-stats" style="border-top:0;padding-top:0"></div>
+    </div>
+
+    <div class="panel" id="valid-panel">
+      <h2>Validation du pharmacien responsable</h2>
+      <div id="valid-box"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Relevés</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Date</th><th>Relevé</th><th>Heure</th><th style="text-align:right">Temp.</th><th style="text-align:right">Mini</th><th style="text-align:right">Maxi</th><th>Opérateur</th><th>Statut</th><th>Commentaire</th></tr></thead>
+        <tbody id="h-body"></tbody>
+      </table></div>
+    </div>
+
+    <div class="panel">
+      <h2>Entretiens du frigo</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Date</th><th>Intervention</th><th>Par</th><th>Détails</th><th></th></tr></thead>
+        <tbody id="e-body"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- REGLAGES -->
+  <section id="v-reglages" class="view" hidden>
+    <div class="panel">
+      <h2>Pharmacie</h2>
+      <form class="row" id="pharma-form"><input id="pharma-name" class="inp" placeholder="Nom de la pharmacie (en-tête des rapports)" style="flex:1"><button class="btn primary" type="submit">Enregistrer</button></form>
+    </div>
+
+    <div class="panel">
+      <div class="row between"><h2>Zones réfrigérées</h2><button class="btn" id="z-new" type="button">Ajouter une zone</button></div>
+      <p class="muted small">Chaque zone a sa plage autorisée, son QR code, sa courbe et son registre.</p>
+      <div class="list" id="zlist"></div>
+      <form class="minmax" id="z-form" novalidate>
+        <h3 id="z-form-title">Modifier la zone</h3>
+        <div class="grid2">
+          <label class="fld"><span class="label">Nom</span><input id="z-nom" maxlength="40" placeholder="Ex. Frigo stock, Chambre froide"></label>
+          <label class="fld"><span class="label">Type</span><select id="z-type"></select></label>
+        </div>
+        <div class="grid2">
+          <label class="fld"><span class="label">Minimum autorisé (°C)</span><input id="z-lo" class="mono" inputmode="decimal"></label>
+          <label class="fld"><span class="label">Maximum autorisé (°C)</span><input id="z-hi" class="mono" inputmode="decimal"></label>
+        </div>
+        <div class="row"><button class="btn primary" type="submit" id="z-save">Enregistrer la zone</button><button class="btn danger" type="button" id="z-del">Retirer la zone</button><span class="muted small" id="z-msg"></span></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>Équipe</h2>
+      <p class="muted small">Le rôle « Pharmacien » permet de valider le registre mensuel. Retirer quelqu'un le masque du choix ; ses relevés restent au registre.</p>
+      <form class="row" id="op-form"><input id="op-name" class="inp" placeholder="Prénom Nom" style="flex:1"><select id="op-role" class="inp"><option value="preparateur">Préparateur</option><option value="pharmacien">Pharmacien</option><option value="autre">Autre</option></select><button class="btn primary" type="submit">Ajouter</button></form>
+      <div class="list" id="oplist"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Notifications par e-mail</h2>
+      <form class="fld" id="notif-form" novalidate style="gap:14px">
+        <label class="fld"><span class="label">Adresse e-mail du pharmacien responsable</span><input id="n-email" type="email" autocomplete="email" placeholder="titulaire@pharmacie.fr"></label>
+        <label class="check"><input type="checkbox" id="n-out"> Alerte immédiate si une température hors plage est saisie</label>
+        <label class="check"><input type="checkbox" id="n-miss"> Alerte si le relevé du matin (12 h) ou du soir (19 h) n'est pas fait</label>
+        <label class="check"><input type="checkbox" id="n-recap"> Récapitulatif hebdomadaire avec le rapport de la semaine</label>
+        <div class="grid2">
+          <label class="fld"><span class="label">Jour du récapitulatif</span><select id="n-day"><option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option><option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="0">Dimanche</option></select></label>
+          <label class="fld"><span class="label">Heure</span><select id="n-hour"></select></label>
+        </div>
+        <div class="row"><button class="btn primary" type="submit">Enregistrer les notifications</button><span class="muted small" id="n-msg"></span></div>
+        <div class="alert info small" id="n-status"></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <div class="row between"><h2>QR code à coller sur la zone</h2><select id="qr-zone" class="btn" aria-label="Zone du QR code"></select></div>
+      <p class="muted small">Scanné avec un téléphone, il ouvre directement la saisie pour cette zone. Seules les personnes à qui la page est partagée peuvent enregistrer un relevé.</p>
+      <div class="qr">
+        <div class="qt">Relevé température</div>
+        <div id="qrbox"></div>
+        <div class="qs" id="qr-sub"></div>
+      </div>
+      <div class="row"><button class="btn" id="qr-dl">Télécharger le QR code (PNG)</button></div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"></script>
+<script>
+/* ================== CONFIGURATION ==================
+   Collez ici l'adresse et la clé publique de votre projet Supabase
+   (Supabase > Project Settings > API : "Project URL" et "anon public").
+   Laissées vides, les données restent sur l'appareil (stockage du navigateur). */
+window.FRIGO_CONFIG = {
+  SUPABASE_URL: "https://vqffgwicqtogvmxmlrrh.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_yj9E5yLfEjaR1gF6rTmxsA_qZP9xSuH"
+};
+/* =================================================== */
+
+(function () {
+  if (window.claude && window.claude.use) return;
+  window.__STANDALONE__ = true;
+  var CFG = window.FRIGO_CONFIG || {};
+  var REMOTE = !!(CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY && window.supabase && window.supabase.createClient);
+  window.__REMOTE__ = REMOTE;
+
+  var listeners = [];
+  function notify() { listeners.slice().forEach(function (f) { try { f(); } catch (e) {} }); }
+  function clone(o) { return o === undefined ? undefined : JSON.parse(JSON.stringify(o)); }
+  function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+  function collOf(path) { return path.split("/").slice(0, -1).join("/"); }
+
+  /* ---------- back-ends: all() / put(path, data) / del(path) ---------- */
+  var backend;
+  if (!REMOTE) {
+    var KEY = "frigo-registre-v1";
+    var read = function () { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } };
+    var write = function (a) { try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) { throw { code: "quota_exceeded", message: "Stockage du navigateur plein ou bloqué." }; } };
+    window.addEventListener("storage", function (e) { if (e.key === KEY) notify(); });
+    backend = {
+      ready: Promise.resolve(),
+      all: read,
+      put: function (p, d) { var a = read(); a[p] = clone(d); write(a); notify(); return Promise.resolve(); },
+      del: function (p) { var a = read(); delete a[p]; write(a); notify(); return Promise.resolve(); }
+    };
+  } else {
+    var sb = window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
+    var cache = {};
+    var fetchAll = async function () {
+      var out = {}, from = 0, size = 1000;
+      for (;;) {
+        var r = await sb.from("documents").select("path,data").range(from, from + size - 1);
+        if (r.error) throw { code: "unavailable", message: r.error.message };
+        r.data.forEach(function (row) { out[row.path] = row.data; });
+        if (r.data.length < size) break;
+        from += size;
+      }
+      cache = out; notify();
+    };
+    var startSync = function () {
+      sb.channel("documents-sync")
+        .on("postgres_changes", { event: "*", schema: "public", table: "documents" }, function (pl) {
+          if (pl.eventType === "DELETE") { if (pl.old && pl.old.path) delete cache[pl.old.path]; }
+          else if (pl.new && pl.new.path) cache[pl.new.path] = pl.new.data;
+          notify();
+        })
+        .subscribe();
+      setInterval(function () { fetchAll().catch(function () {}); }, 60000);
+      document.addEventListener("visibilitychange", function () { if (!document.hidden) fetchAll().catch(function () {}); });
+    };
+    var err = function (e) { return { code: /row-level security|JWT|permission|42501/i.test(e.message || "") ? "not_granted" : "unavailable", message: e.message || String(e) }; };
+    backend = {
+      sb: sb,
+      ready: null,
+      all: function () { return cache; },
+      put: async function (p, d) {
+        var prev = cache[p]; cache[p] = clone(d); notify();
+        var r = await sb.from("documents").upsert({ path: p, collection: collOf(p), data: clone(d) });
+        if (r.error) { if (prev === undefined) delete cache[p]; else cache[p] = prev; notify(); throw err(r.error); }
+      },
+      del: async function (p) {
+        var prev = cache[p]; delete cache[p]; notify();
+        var r = await sb.from("documents").delete().eq("path", p);
+        if (r.error) { cache[p] = prev; notify(); throw err(r.error); }
+      }
+    };
+
+    /* ---------- team sign-in ---------- */
+    backend.ready = new Promise(function (resolve) {
+      var go = async function () { try { await fetchAll(); } catch (e) {} startSync(); addLogout(); resolve(); };
+      sb.auth.getSession().then(function (r) {
+        if (r.data && r.data.session) go();
+        else showLogin(go);
+      });
+    });
+    function showLogin(done) {
+      var mount = function () {
+        var wrap = document.querySelector(".wrap");
+        var p = document.createElement("form"); p.className = "panel"; p.id = "login"; p.noValidate = true;
+        p.innerHTML = '<h2>Connexion au registre</h2><p class="muted small">Utilisez le compte de la pharmacie (créé par le pharmacien responsable dans Supabase).</p>' +
+          '<label class="fld"><span class="label">E-mail</span><input id="lg-mail" type="email" autocomplete="username" placeholder="equipe@pharmacie.fr"></label>' +
+          '<label class="fld"><span class="label">Mot de passe</span><input id="lg-pw" type="password" autocomplete="current-password"></label>' +
+          '<button class="btn primary big" type="submit">Se connecter</button><p class="small" id="lg-msg" style="color:var(--crit)"></p>';
+        wrap.insertBefore(p, wrap.children[1]);
+        p.onsubmit = async function (e) {
+          e.preventDefault();
+          var m = p.querySelector("#lg-msg"); m.textContent = "";
+          var r = await sb.auth.signInWithPassword({ email: p.querySelector("#lg-mail").value.trim(), password: p.querySelector("#lg-pw").value });
+          if (r.error) { m.textContent = "Connexion refusée : vérifiez l'e-mail et le mot de passe."; return; }
+          p.remove(); done();
+        };
+      };
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
+    }
+    function addLogout() {
+      var live = document.getElementById("live"); if (!live || document.getElementById("logout")) return;
+      var b = document.createElement("button"); b.id = "logout"; b.type = "button"; b.className = "btn"; b.textContent = "Déconnexion";
+      b.onclick = async function () { await sb.auth.signOut(); location.reload(); };
+      live.parentNode.appendChild(b);
+    }
+  }
+
+  /* ---------- same interface as the claude.ai database ---------- */
+  function snap(path, data) { return { id: path.split("/").pop(), exists: data !== undefined, data: function () { return clone(data); }, metadata: { fromCache: false, hasPendingWrites: false } }; }
+  function docRef(path) {
+    return {
+      id: path.split("/").pop(), path: path,
+      get: function () { return Promise.resolve(snap(path, backend.all()[path])); },
+      set: function (d) { return backend.put(path, d); },
+      update: function (d) { var cur = backend.all()[path]; if (!cur) return Promise.reject({ code: "invalid_argument", message: "Document introuvable." }); return backend.put(path, Object.assign(clone(cur), clone(d))); },
+      "delete": function () { return backend.del(path); },
+      onSnapshot: function (next) { var f = function () { next(snap(path, backend.all()[path])); }; listeners.push(f); setTimeout(f, 0); return function () { listeners = listeners.filter(function (x) { return x !== f; }); }; },
+      collection: function (sub) { return collRef(path + "/" + sub); }
+    };
+  }
+  function collRef(path, opts) {
+    opts = opts || {};
+    function run() {
+      var a = backend.all(), pre = path + "/", docs = [];
+      Object.keys(a).forEach(function (k) { if (k.indexOf(pre) === 0 && k.slice(pre.length).indexOf("/") < 0) docs.push(snap(k, a[k])); });
+      if (opts.order) { var f = opts.order[0], dir = opts.order[1] === "desc" ? -1 : 1; docs.sort(function (x, y) { var u = x.data()[f], v = y.data()[f]; return (u > v ? 1 : u < v ? -1 : 0) * dir; }); }
+      if (opts.limit) docs = docs.slice(0, opts.limit);
+      return { docs: docs, size: docs.length, empty: !docs.length, docChanges: function () { return []; }, metadata: { fromCache: false, hasPendingWrites: false } };
+    }
+    return {
+      path: path,
+      doc: function (id) { return docRef(path + "/" + (id || newId())); },
+      add: function (d) { var r = docRef(path + "/" + newId()); return r.set(d).then(function () { return r; }); },
+      orderBy: function (f, dir) { return collRef(path, Object.assign({}, opts, { order: [f, dir] })); },
+      limit: function (n) { return collRef(path, Object.assign({}, opts, { limit: n })); },
+      where: function () { return collRef(path, opts); },
+      get: function () { return Promise.resolve(run()); },
+      onSnapshot: function (next) { var f = function () { next(run()); }; listeners.push(f); setTimeout(f, 0); return function () { listeners = listeners.filter(function (x) { return x !== f; }); }; }
+    };
+  }
+  var db = { doc: docRef, collection: function (p) { return collRef(p); } };
+  var downloads = { save: function (o) { var url = URL.createObjectURL(o.data), a = document.createElement("a"); a.href = url; a.download = o.filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 4000); return Promise.resolve(); } };
+  var user = { id: async function () { if (!REMOTE) return null; var r = await backend.sb.auth.getUser(); return r.data && r.data.user ? r.data.user.id : null; } };
+  var caps = { db: db, downloads: downloads, user: user };
+  window.claude = { use: function (n) { return n === "db" ? backend.ready.then(function () { return db; }) : Promise.resolve(caps[n] || null); } };
+})();
+</script>
+<script>
+(() => {
+  "use strict";
+  const APP_URL = window.__STANDALONE__ ? location.href.split("#")[0] : "https://claude.ai/artifact/3TrNSqTCe2gHiD2AZW2UPd";
+  const DAYS = 30, H_MATIN = 12, H_SOIR = 19;
+  const DEFAULT_ZONE = { id: "frigo-vaccins", nom: "Frigo vaccins", type: "frigo", lo: 2, hi: 8, ordre: 0 };
+  const TYPES = { frigo: ["Réfrigérateur", 2, 8], congel: ["Congélateur", -25, -15], ambiant: ["Stock à température ambiante", 15, 25], autre: ["Autre", 2, 8] };
+  const ENT = { degivrage: "Dégivrage", nettoyage: "Nettoyage", maintenance: "Maintenance / dépannage", verif_thermo: "Vérification du thermomètre", panne: "Panne / coupure de courant", autre: "Autre intervention" };
+  const ROLES = { pharmacien: "Pharmacien", preparateur: "Préparateur", autre: "Autre" };
+
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+
+  let db = null, dl = null, userApi = null, loaded = false;
+  let ops = [], readings = [], zoneDocs = [], ents = [], valids = [], config = {}, envois = {};
+
+  /* ---------- dates & numbers ---------- */
+  const pad = n => String(n).padStart(2, "0");
+  const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const parseYmd = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const addDays = (s, n) => { const d = parseYmd(s); d.setDate(d.getDate() + n); return ymd(d); };
+  const fmtDay = s => parseYmd(s).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
+  const fmtDayShort = s => parseYmd(s).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  const fmtDayLong = s => parseYmd(s).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  const fmtTime = ts => new Date(ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  const fmtMonth = mo => new Date(mo + "-01T12:00").toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+  const fmtT = v => v == null || isNaN(v) ? "—" : Number(v).toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmtS = v => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+  const num = s => { if (s == null || s === "") return null; const v = parseFloat(String(s).replace(",", ".").replace("−", "-").trim()); return isNaN(v) ? null : Math.round(v * 10) / 10; };
+  const today = () => ymd(new Date());
+  const lastDays = () => { const t = today(); const out = []; for (let i = DAYS - 1; i >= 0; i--) out.push(addDays(t, -i)); return out; };
+  const weekStart = s => { const d = parseYmd(s); const wd = (d.getDay() + 6) % 7; d.setDate(d.getDate() - wd); return ymd(d); };
+  const monthEnd = mo => { const [y, m] = mo.split("-").map(Number); return ymd(new Date(y, m, 0)); };
+  const daysBetween = (a, b) => { const out = []; for (let d = a; d <= b; d = addDays(d, 1)) out.push(d); return out; };
+  const initials = s => s.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("") || "?";
+  const slug = s => (s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40)) || "zone";
+
+  /* ---------- zones ---------- */
+  const normZone = z => ({ ...DEFAULT_ZONE, ...z, lo: Number(z.lo ?? DEFAULT_ZONE.lo), hi: Number(z.hi ?? DEFAULT_ZONE.hi) });
+  function zones() {
+    const a = zoneDocs.filter(z => z.actif !== false && typeof z.nom === "string").map(normZone);
+    return a.length ? a.sort((x, y) => (x.ordre ?? 0) - (y.ordre ?? 0) || x.nom.localeCompare(y.nom, "fr")) : [{ ...DEFAULT_ZONE, virtual: true }];
+  }
+  let zoneId = store.get("frigo.zone") || DEFAULT_ZONE.id, pendingZone = null;
+  function zone() {
+    const zs = zones();
+    if (pendingZone && zs.some(z => z.id === pendingZone)) { zoneId = pendingZone; pendingZone = null; store.set("frigo.zone", zoneId); }
+    return zs.find(z => z.id === zoneId) || zs[0];
+  }
+  const rangeTxt = z => `${fmtS(z.lo)} / ${fmtS(z.hi)} °C`;
+  const zoneOf = r => r.enc || DEFAULT_ZONE.id;
+  const isOut = (v, z) => v < z.lo || v > z.hi;
+  const zReadings = z => readings.filter(r => zoneOf(r) === z.id);
+  const zEnts = z => ents.filter(e => (e.enc || DEFAULT_ZONE.id) === z.id);
+  const opName = r => (ops.find(o => o.id === r.opId)?.nom) || r.opNom || "inconnu";
+
+  /* ---------- UI helpers ---------- */
+  let toastT;
+  function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3400); }
+  function setLive(on, txt) { const l = $("#live"); l.classList.toggle("on", on); l.querySelector("span").textContent = txt; }
+  const errTxt = e => e && e.code === "not_granted" ? "vous n'avez pas le droit d'écrire dans ce registre (demandez un accès en modification)" : (e && (e.message || e.code)) || "erreur inconnue";
+  const ICON_SUN = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`;
+  const ICON_MOON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>`;
+  const ICON_STAMP = `<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>`;
+
+  /* ---------- routing ---------- */
+  const VIEWS = ["saisie", "suivi", "registre", "reglages"];
+  function route() {
+    const h = location.hash.slice(1); const i = h.indexOf("-");
+    const v0 = i < 0 ? h : h.slice(0, i); const z = i < 0 ? null : h.slice(i + 1);
+    const v = VIEWS.includes(v0) ? v0 : "suivi";
+    if (z) pendingZone = z;
+    VIEWS.forEach(n => $("#v-" + n).hidden = n !== v);
+    document.querySelectorAll("nav.tabs a").forEach(a => a.setAttribute("aria-current", a.dataset.view === v ? "page" : "false"));
+    renderAll();
+  }
+  addEventListener("hashchange", route);
+
+  function renderZones() {
+    const zs = zones(), cur = zone(), box = $("#zones"); box.innerHTML = "";
+    box.hidden = zs.length < 2;
+    zs.forEach(z => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "zone"; b.setAttribute("aria-pressed", z.id === cur.id);
+      const n = document.createElement("span"); n.textContent = z.nom; const r = document.createElement("span"); r.className = "rg"; r.textContent = rangeTxt(z);
+      b.append(n, r); b.onclick = () => { zoneId = z.id; store.set("frigo.zone", z.id); renderAll(); };
+      box.append(b);
+    });
+    $("#pharma-lbl").textContent = (config.pharmacie ? config.pharmacie + " · " : "") + (zs.length > 1 ? `${zs.length} zones réfrigérées` : `${cur.nom} · plage ${rangeTxt(cur)}`);
+  }
+
+  /* ---------- to-do (all zones) ---------- */
+  function renderTodo() {
+    const items = [], h = new Date().getHours(), t = today();
+    zones().forEach(z => {
+      const rs = zReadings(z);
+      [["matin", H_MATIN], ["soir", H_SOIR]].forEach(([s, lim]) => {
+        if (h >= lim && !rs.some(r => r.date === t && r.slot === s)) items.push(["warn", `${z.nom} : relevé du ${s} non fait (attendu avant ${lim} h)`, "#saisie-" + z.id, "En retard"]);
+      });
+      const out = rs.filter(r => r.out && Date.now() - r.ts < 48 * 3600e3).sort((a, b) => b.ts - a.ts)[0];
+      if (out) items.push(["crit", `${z.nom} : ${fmtT(out.temp)} °C le ${fmtDay(out.date)} (${out.slot}), hors plage. Action : ${out.comment || "non renseignée"}`, "#registre", "Hors plage"]);
+      const prev = ymd(new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)).slice(0, 7);
+      if (rs.some(r => r.date.startsWith(prev)) && !valids.some(v => v.enc === z.id && v.mois === prev)) items.push(["none", `${z.nom} : registre de ${fmtMonth(prev)} à valider par le pharmacien responsable`, "#registre", "Validation"]);
+    });
+    const box = $("#todo"); box.innerHTML = "";
+    $("#todo-box").hidden = !loaded || !items.length;
+    items.forEach(([lvl, txt, href, tag]) => {
+      const a = document.createElement("a"); a.href = href;
+      const s = document.createElement("span"); s.className = "small"; s.textContent = txt;
+      const p = document.createElement("span"); p.className = "pill " + lvl; p.textContent = tag;
+      a.onclick = () => { const m = href.match(/^#\w+-(.+)$/); if (m) { zoneId = m[1]; store.set("frigo.zone", zoneId); } };
+      a.append(s, p); box.append(a);
+    });
+  }
+
+  /* ---------- operators ---------- */
+  let selOp = store.get("frigo.op");
+  function renderOps() {
+    const active = ops.filter(o => o.actif !== false).sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+    const box = $("#ops"); box.innerHTML = "";
+    $("#ops-empty").hidden = !loaded || active.length > 0;
+    if (!active.some(o => o.id === selOp)) selOp = active.length === 1 ? active[0].id : null;
+    active.forEach(o => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "op"; b.setAttribute("aria-pressed", o.id === selOp);
+      const i = document.createElement("span"); i.className = "ini"; i.textContent = initials(o.nom);
+      const n = document.createElement("span"); n.textContent = o.nom;
+      b.append(i, n); b.onclick = () => { selOp = o.id; store.set("frigo.op", o.id); renderOps(); };
+      box.append(b);
+    });
+    const list = $("#oplist"); list.innerHTML = "";
+    if (!ops.length) { const p = document.createElement("p"); p.className = "muted small"; p.textContent = loaded ? "Aucun membre pour l'instant." : "Chargement…"; list.append(p); }
+    [...ops].sort((a, b) => (b.actif !== false) - (a.actif !== false) || a.nom.localeCompare(b.nom, "fr")).forEach(o => {
+      const r = document.createElement("div"); r.className = "lrow";
+      const m = document.createElement("div"); m.className = "main";
+      const n = document.createElement("span"); n.textContent = o.nom + (o.actif === false ? " (retiré)" : ""); if (o.actif === false) n.className = "muted";
+      const c = document.createElement("span"); c.className = "muted small"; const k = readings.filter(x => x.opId === o.id).length; c.textContent = `${k} relevé${k > 1 ? "s" : ""}`;
+      m.append(n, c);
+      const right = document.createElement("div"); right.className = "row";
+      const sel = document.createElement("select"); sel.className = "inp"; sel.setAttribute("aria-label", "Rôle de " + o.nom);
+      Object.entries(ROLES).forEach(([k2, v]) => { const op = document.createElement("option"); op.value = k2; op.textContent = v; sel.append(op); });
+      sel.value = o.role || "preparateur";
+      sel.onchange = () => db && db.doc("operateurs/" + o.id).update({ role: sel.value }).then(() => toast("Rôle mis à jour")).catch(e => toast("Refusé : " + errTxt(e)));
+      const b = document.createElement("button"); b.className = "btn" + (o.actif === false ? "" : " danger"); b.textContent = o.actif === false ? "Réactiver" : "Retirer";
+      b.onclick = () => db && db.doc("operateurs/" + o.id).update({ actif: o.actif === false }).catch(e => toast("Refusé : " + errTxt(e)));
+      right.append(sel, b); r.append(m, right); list.append(r);
+    });
+  }
+  async function addOp(name, role) {
+    name = name.trim().replace(/\s+/g, " ");
+    if (!name) return;
+    if (!db) { toast("Registre non connecté."); return; }
+    if (ops.some(o => o.nom.toLowerCase() === name.toLowerCase() && o.actif !== false)) { toast(name + " est déjà dans l'équipe."); return; }
+    try { const ref = await db.collection("operateurs").add({ nom: name.slice(0, 60), role: role || "preparateur", actif: true, cree: Date.now() }); selOp = ref.id; store.set("frigo.op", ref.id); toast(name + " ajouté·e à l'équipe"); }
+    catch (e) { toast("Ajout refusé : " + errTxt(e)); }
+  }
+  $("#op-form").onsubmit = e => { e.preventDefault(); addOp($("#op-name").value, $("#op-role").value); $("#op-name").value = ""; };
+  $("#quick-op-add").onclick = () => { addOp($("#quick-op").value, "preparateur"); $("#quick-op").value = ""; };
+
+  /* ---------- saisie ---------- */
+  let mode = "temp", selSlot = new Date().getHours() < 13 ? "matin" : "soir";
+  $("#f-date").value = today(); $("#f-date").max = today();
+  $("#e-date").value = today(); $("#e-date").max = today();
+  Object.entries(ENT).forEach(([k, v]) => { const o = document.createElement("option"); o.value = k; o.textContent = v; $("#e-type").append(o); });
+  function setMode(m) { mode = m; document.querySelectorAll("[data-mode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === m)); $("#form-temp").hidden = m !== "temp"; $("#form-ent").hidden = m !== "ent"; }
+  document.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+  function setSlot(s) { selSlot = s; document.querySelectorAll("[data-slot]").forEach(b => b.setAttribute("aria-pressed", b.dataset.slot === s)); checkDup(); }
+  document.querySelectorAll("[data-slot]").forEach(b => b.onclick = () => setSlot(b.dataset.slot));
+  $("#f-date").onchange = checkDup;
+  const existing = () => { const z = zone(); return readings.find(r => zoneOf(r) === z.id && r.date === $("#f-date").value && r.slot === selSlot); };
+  function checkDup() {
+    const ex = existing(), box = $("#dup");
+    if (!ex) { box.hidden = true; $("#save").textContent = "Enregistrer le relevé"; return; }
+    box.hidden = false;
+    box.textContent = `Le relevé du ${selSlot} est déjà fait : ${fmtT(ex.temp)} °C à ${fmtTime(ex.ts)} par ${opName(ex)}. Enregistrer remplace la valeur ; l'ancienne reste tracée dans le registre.`;
+    $("#save").textContent = "Corriger le relevé du " + selSlot;
+  }
+  function renderScale() {
+    const z = zone(), smin = Math.floor(z.lo - 4), smax = Math.ceil(z.hi + 4);
+    const pct = v => (Math.max(smin, Math.min(smax, v)) - smin) / (smax - smin) * 100;
+    const sc = $("#scale"); sc.querySelectorAll(".tick").forEach(t => t.remove());
+    [smin, z.lo, z.hi, smax].forEach(v => { const t = document.createElement("span"); t.className = "tick"; t.style.left = pct(v) + "%"; t.textContent = fmtS(v); sc.append(t); });
+    $("#sc-ok").style.left = pct(z.lo) + "%"; $("#sc-ok").style.width = (pct(z.hi) - pct(z.lo)) + "%";
+    sc._pct = pct;
+    $("#saisie-zone").textContent = `${z.nom} · plage ${rangeTxt(z)}`;
+    $("#outbox b").textContent = `Hors plage ${rangeTxt(z)}.`;
+  }
+  function onTemp() {
+    const z = zone(), v = num($("#f-temp").value), inp = $("#f-temp"), mk = $("#sc-mark"), out = v != null && isOut(v, z);
+    inp.classList.toggle("in", v != null && !out); inp.classList.toggle("out", out);
+    mk.hidden = v == null; if (v != null && $("#scale")._pct) mk.style.left = $("#scale")._pct(v) + "%";
+    $("#outbox").hidden = !out;
+    $("#comment-lbl").textContent = out ? "Action corrective menée (obligatoire)" : "Commentaire";
+    const mn = num($("#f-min").value), mx = num($("#f-max").value), mm = $("#mm-out");
+    const mmOut = (mn != null && mn < z.lo) || (mx != null && mx > z.hi);
+    mm.hidden = !mmOut; mm.textContent = mmOut ? `Le thermomètre mini/maxi indique une sortie de plage depuis le dernier relevé (${mn != null && mn < z.lo ? "mini " + fmtT(mn) + " °C" : ""}${mn != null && mn < z.lo && mx != null && mx > z.hi ? ", " : ""}${mx != null && mx > z.hi ? "maxi " + fmtT(mx) + " °C" : ""}). Notez l'action menée dans le commentaire.` : "";
+  }
+  ["#f-temp", "#f-min", "#f-max"].forEach(s => $(s).addEventListener("input", onTemp));
+  const step = d => { const v = num($("#f-temp").value) ?? (zone().lo + zone().hi) / 2; $("#f-temp").value = fmtT(Math.round((v + d) * 10) / 10); onTemp(); };
+  $("#minus").onclick = () => step(-0.1); $("#plus").onclick = () => step(0.1);
+
+  async function ensureZoneDoc(z) {
+    if (!z.virtual || !db) return;
+    await db.doc("enceintes/" + z.id).set({ nom: z.nom, type: z.type, lo: z.lo, hi: z.hi, ordre: 0, actif: true });
+  }
+
+  $("#form-temp").onsubmit = async e => {
+    e.preventDefault();
+    const z = zone(), msg = $("#form-msg"); msg.style.color = "var(--crit)";
+    const temp = num($("#f-temp").value), tmin = num($("#f-min").value), tmax = num($("#f-max").value), comment = $("#f-comment").value.trim();
+    const mmOut = (tmin != null && tmin < z.lo) || (tmax != null && tmax > z.hi);
+    if (!selOp) { msg.textContent = "Choisissez qui fait le relevé."; return; }
+    if (temp == null || temp < -40 || temp > 50) { msg.textContent = "Saisissez la température lue sur l'afficheur, par exemple 5,2."; $("#f-temp").focus(); return; }
+    if ((isOut(temp, z) || mmOut) && comment.length < 3) { msg.textContent = "Sortie de plage : décrivez l'action menée avant d'enregistrer."; $("#f-comment").focus(); return; }
+    if (!db) { msg.textContent = "Le registre n'est pas joignable. Vérifiez la connexion puis réessayez."; return; }
+    const date = $("#f-date").value || today(), id = `${z.id}_${date}_${selSlot}`, ex = existing(), op = ops.find(o => o.id === selOp);
+    const rec = { enc: z.id, date, slot: selSlot, temp, tmin, tmax, raz: $("#f-raz").checked, opId: selOp, opNom: op ? op.nom : "", ts: Date.now(), comment: comment.slice(0, 500), out: isOut(temp, z), mmOut, lo: z.lo, hi: z.hi, source: "manuel" };
+    try { const uid = userApi && userApi.id ? await userApi.id() : null; if (uid) rec.uid = uid; } catch {}
+    if (ex) rec.corrections = [...(ex.corrections || []), { temp: ex.temp, opId: ex.opId, opNom: opName(ex), ts: ex.ts, comment: ex.comment || "" }].slice(-20);
+    $("#save").disabled = true;
+    try {
+      await ensureZoneDoc(z);
+      await db.doc("releves/" + (ex ? ex.id : id)).set(rec);
+      msg.style.color = "var(--ok)"; msg.textContent = `Relevé du ${selSlot} enregistré : ${fmtT(temp)} °C à ${fmtTime(rec.ts)}.`;
+      toast(rec.out || mmOut ? "Sortie de plage enregistrée. Prévenez le pharmacien responsable." : "Relevé enregistré");
+      ["#f-temp", "#f-min", "#f-max", "#f-comment"].forEach(s => $(s).value = ""); $("#f-raz").checked = false; onTemp();
+    } catch (err) { msg.textContent = "Enregistrement refusé : " + errTxt(err); }
+    finally { $("#save").disabled = false; }
+  };
+
+  $("#e-type").onchange = () => { const k = $("#e-type").value; $("#e-comment-lbl").textContent = k === "panne" || k === "maintenance" ? "Détails (obligatoire : durée, cause, produits concernés)" : "Détails"; };
+  $("#form-ent").onsubmit = async e => {
+    e.preventDefault();
+    const z = zone(), msg = $("#e-msg"); msg.style.color = "var(--crit)";
+    const type = $("#e-type").value, comment = $("#e-comment").value.trim(), date = $("#e-date").value || today();
+    if (!selOp) { msg.textContent = "Choisissez qui a fait l'intervention."; return; }
+    if ((type === "panne" || type === "maintenance") && comment.length < 3) { msg.textContent = "Décrivez l'intervention : durée, cause, produits concernés."; $("#e-comment").focus(); return; }
+    if (!db) { msg.textContent = "Le registre n'est pas joignable."; return; }
+    const op = ops.find(o => o.id === selOp);
+    $("#e-save").disabled = true;
+    try {
+      await ensureZoneDoc(z);
+      await db.collection("entretiens").add({ enc: z.id, type, date, ts: Date.now(), opId: selOp, opNom: op ? op.nom : "", comment: comment.slice(0, 800) });
+      msg.style.color = "var(--ok)"; msg.textContent = `${ENT[type]} enregistré pour ${z.nom}, le ${fmtDayLong(date)}.`;
+      $("#e-comment").value = ""; toast("Entretien enregistré");
+    } catch (err) { msg.textContent = "Enregistrement refusé : " + errTxt(err); }
+    finally { $("#e-save").disabled = false; }
+  };
+
+  /* ---------- suivi ---------- */
+  function byDay(days, rs) { const out = {}; days.forEach(d => out[d] = { matin: null, soir: null }); rs.forEach(r => { if (out[r.date]) out[r.date][r.slot] = r; }); return out; }
+  function exampleData(days, z) {
+    const mid = (z.lo + z.hi) / 2, amp = (z.hi - z.lo) / 6, out = {};
+    days.forEach((d, i) => { const m = mid - amp * .4 + Math.sin(i / 3.1) * amp + ((i * 7) % 5) / 10, s = mid + amp * .2 + Math.cos(i / 2.7) * amp + ((i * 3) % 4) / 10;
+      out[d] = { matin: i === 11 ? null : { temp: Math.round(m * 10) / 10 }, soir: i === 19 ? { temp: z.hi + .6 } : { temp: Math.round(s * 10) / 10 } }; });
+    return out;
+  }
+  function ring(size, sw, pct, inner, label, showLabel) {
+    const r = (size - sw) / 2, c = size / 2, p = pct == null ? 0 : Math.max(0, Math.min(100, pct));
+    return `<div class="gauge"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${esc(label)} : ${pct == null ? "aucune donnée" : Math.round(p) + " %"}">
+      <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--soft-2)" stroke-width="${sw}"/>
+      ${p > 0 ? `<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--hi)" stroke-width="${sw}" stroke-linecap="round" pathLength="100" stroke-dasharray="${Math.max(.01, p >= 100 ? 100 : p - 1.5)} 100" transform="rotate(-90 ${c} ${c})"/>` : ""}
+      ${inner}</svg>${showLabel ? `<span class="label">${esc(label)}</span>` : ""}</div>`;
+  }
+  function renderHero(z, days, map, flat) {
+    const t = today(), h = new Date().getHours();
+    const expected = s => DAYS - (!map[t][s] && h < (s === "matin" ? H_MATIN : H_SOIR) ? 1 : 0);
+    const compl = s => flat.length ? days.filter(d => map[d][s]).length / expected(s) * 100 : null;
+    const conf = flat.length ? flat.filter(r => !r.out).length / flat.length * 100 : null;
+    const narrow = window.innerWidth < 480, big = narrow ? 186 : 236, sm = narrow ? 74 : 92, cc = big / 2, sc = sm / 2, fs = big * .3;
+    const centre = `<text x="${cc}" y="${cc + fs * .3}" text-anchor="middle"><tspan class="big" style="font-size:${fs}px">${conf == null ? "—" : Math.round(conf)}</tspan>${conf == null ? "" : `<tspan class="sup" dx="2" dy="${-fs * .38}" style="font-size:${fs * .36}px">%</tspan>`}</text>
+      <text x="${cc}" y="${cc + fs * .3 + 30}" text-anchor="middle" class="glabel">Conformité</text>`;
+    const side = v => `<text x="${sc}" y="${sc + 6}" text-anchor="middle" class="sm">${v == null ? "—" : Math.round(v)}</text>`;
+    $("#hero").innerHTML = ring(sm, 7, compl("matin"), side(compl("matin")), "Matin", true) + ring(big, 18, conf, centre, "Conformité", false) + ring(sm, 7, compl("soir"), side(compl("soir")), "Soir", true);
+    $("#hero-sub").textContent = !loaded ? "Chargement du registre…" : flat.length
+      ? `${z.nom} : ${flat.length} relevé${flat.length > 1 ? "s" : ""} sur 30 jours, dont ${flat.filter(r => !r.out).length} dans la plage ${rangeTxt(z)}. Petites jauges : relevés faits.`
+      : `Aucun relevé pour ${z.nom} sur les 30 derniers jours. Le premier relevé remplira les jauges.`;
+    const rs = zReadings(z), last = [...rs].sort((a, b) => b.ts - a.ts)[0], outN = flat.filter(r => r.out).length;
+    const le = [...zEnts(z)].sort((a, b) => b.date.localeCompare(a.date) || b.ts - a.ts)[0];
+    const tiles = [
+      [last ? fmtT(last.temp) : "—", last ? "°C" : "", "Dernier relevé", last && last.out, last ? `${fmtDayShort(last.date)} · ${last.slot}` : ""],
+      [String(outN), "", "Hors plage 30 j", outN > 0, ""],
+      [le ? fmtDayShort(le.date) : "—", "", "Dernier entretien", false, le ? ENT[le.type] || le.type : "Aucun enregistré"],
+    ];
+    const box = $("#tiles"); box.innerHTML = "";
+    tiles.forEach(([v, u, k, bad, sub]) => { const tl = document.createElement("div"); tl.className = "tile";
+      const n = document.createElement("span"); n.className = "v" + (bad ? " crit" : ""); n.textContent = v; if (u) { const s = document.createElement("small"); s.textContent = u; n.append(s); }
+      const l = document.createElement("span"); l.className = "label"; l.textContent = k; tl.append(n, l);
+      if (sub) { const s2 = document.createElement("span"); s2.className = "sub"; s2.textContent = sub; tl.append(s2); }
+      box.append(tl); });
+  }
+  function renderToday(z) {
+    const d = today(); $("#todaylbl").textContent = fmtDay(d);
+    const box = $("#today"); box.innerHTML = "";
+    ["matin", "soir"].forEach(s => {
+      const r = zReadings(z).find(x => x.date === d && x.slot === s);
+      const c = document.createElement("a"); c.className = "slot-card"; c.href = "#saisie-" + z.id;
+      c.onclick = () => { setMode("temp"); setSlot(s); $("#f-date").value = d; checkDup(); };
+      const head = document.createElement("div"); head.className = "slot-head"; head.innerHTML = `<span class="ico">${s === "matin" ? ICON_SUN : ICON_MOON}</span><span class="label">${s === "matin" ? "Matin" : "Soir"}</span>`;
+      const v = document.createElement("span"); v.className = "v" + (r && r.out ? " crit" : "");
+      if (r) { v.textContent = fmtT(r.temp); const u = document.createElement("small"); u.textContent = "°C"; v.append(u); } else v.textContent = "—";
+      const p = document.createElement("span");
+      if (r) { p.className = "pill " + (r.out ? "crit" : "ok"); p.textContent = r.out ? "⚠ Hors plage" : "✓ Conforme"; }
+      else { const late = new Date().getHours() >= (s === "matin" ? H_MATIN : H_SOIR); p.className = "pill " + (late ? "warn" : "none"); p.textContent = late ? "! En retard" : "À faire"; }
+      const w = document.createElement("span"); w.className = "who"; w.textContent = r ? `${opName(r)} · ${fmtTime(r.ts)}` : "Touchez pour saisir";
+      c.append(head, v, p, w); box.append(c);
+    });
+  }
+  function renderSuivi() {
+    if ($("#v-suivi").hidden) return;
+    const z = zone(), days = lastDays(), rs = zReadings(z), map = byDay(days, rs);
+    const flat = days.flatMap(d => ["matin", "soir"].map(s => map[d][s]).filter(Boolean));
+    renderHero(z, days, map, flat); renderToday(z);
+    $("#legend-range").textContent = rangeTxt(z);
+    const isEx = flat.length === 0;
+    $("#example-note").hidden = !isEx;
+    const data = isEx ? exampleData(days, z) : map;
+    const entDays = {}; zEnts(z).forEach(e => { (entDays[e.date] = entDays[e.date] || []).push(e); });
+    const host = $("#chart"), W = Math.max(300, host.clientWidth || 600), H = W < 500 ? 240 : 300, m = { l: 36, r: 14, t: 14, b: 34 };
+    const vals = []; days.forEach(d => ["matin", "soir"].forEach(s => { const r = data[d][s]; if (r) vals.push(r.temp); }));
+    const yLo = Math.min(Math.floor(z.lo - 2), vals.length ? Math.floor(Math.min(...vals)) - 1 : z.lo - 2);
+    const yHi = Math.max(Math.ceil(z.hi + 4), vals.length ? Math.ceil(Math.max(...vals)) + 1 : z.hi + 4);
+    const x = i => m.l + (W - m.l - m.r) * (i / (DAYS - 1)), y = v => m.t + (H - m.t - m.b) * (1 - (v - yLo) / (yHi - yLo));
+    let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Températures matin et soir des 30 derniers jours pour ${esc(z.nom)}, plage ${esc(rangeTxt(z))}">`;
+    svg += `<rect x="${m.l}" y="${y(z.hi)}" width="${W - m.l - m.r}" height="${y(z.lo) - y(z.hi)}" fill="var(--band)"/>`;
+    [z.lo, z.hi].forEach(v => svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--band-edge)" stroke-dasharray="4 4"/><text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end" style="fill:var(--ink-2);font-weight:600">${esc(fmtS(v))}°</text>`);
+    const span = yHi - yLo, stepY = span > 30 ? 10 : span > 16 ? 4 : 2;
+    for (let v = Math.ceil(yLo / stepY) * stepY; v <= yHi; v += stepY) {
+      if (Math.abs(v - z.lo) < stepY / 2 || Math.abs(v - z.hi) < stepY / 2) continue;
+      svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end">${esc(fmtS(v))}°</text>`;
+    }
+    const every = W < 500 ? 7 : 4;
+    days.forEach((d, i) => { if ((DAYS - 1 - i) % every === 0) svg += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${esc(fmtDayShort(d))}</text>`; });
+    days.forEach((d, i) => { if (entDays[d]) svg += `<rect x="${x(i) - 4}" y="${H - m.b + 6}" width="8" height="8" transform="rotate(45 ${x(i)} ${H - m.b + 10})" fill="var(--c3)"/>`; });
+    const col = { matin: "var(--s-matin)", soir: "var(--s-soir)" };
+    ["matin", "soir"].forEach(s => {
+      let path = "", pen = false;
+      days.forEach((d, i) => { const r = data[d][s]; if (r) { path += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(r.temp).toFixed(1); pen = true; } else pen = false; });
+      svg += `<path d="${path}" fill="none" stroke="${isEx ? "var(--c4)" : col[s]}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" ${s === "soir" ? 'stroke-dasharray="6 4"' : ""}/>`;
+    });
+    ["matin", "soir"].forEach(s => days.forEach((d, i) => { const r = data[d][s]; if (!r) return;
+      const o = isOut(r.temp, z), f = o ? "var(--crit)" : (isEx ? "var(--c4)" : col[s]), cx = x(i), cy = y(r.temp), h2 = o ? 5.5 : 4;
+      svg += s === "matin" ? `<circle cx="${cx}" cy="${cy}" r="${h2}" fill="${f}" stroke="var(--surface)" stroke-width="2"/>` : `<rect x="${cx - h2}" y="${cy - h2}" width="${h2 * 2}" height="${h2 * 2}" rx="1.5" fill="${f}" stroke="var(--surface)" stroke-width="2"/>`;
+      if (o) svg += `<text x="${cx}" y="${cy + (r.temp > z.hi ? -10 : 18)}" text-anchor="middle" style="fill:var(--crit);font-weight:600">${esc(fmtT(r.temp))}</text>`;
+    }));
+    svg += `<line id="xh" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" stroke="var(--c4)" visibility="hidden"/><rect id="hit" x="${m.l}" y="0" width="${W - m.l - m.r}" height="${H}" fill="transparent"/></svg><div class="tip" id="tip" hidden></div>`;
+    host.innerHTML = svg;
+    const hit = host.querySelector("#hit"), xh = host.querySelector("#xh"), tip = host.querySelector("#tip"), el = host.querySelector("svg");
+    const move = ev => {
+      const rect = el.getBoundingClientRect(), sx = (ev.clientX - rect.left) * (W / rect.width);
+      const i = Math.max(0, Math.min(DAYS - 1, Math.round((sx - m.l) / ((W - m.l - m.r) / (DAYS - 1))))), d = days[i];
+      xh.setAttribute("x1", x(i)); xh.setAttribute("x2", x(i)); xh.setAttribute("visibility", "visible");
+      tip.hidden = false; tip.innerHTML = ""; const t = document.createElement("div"); t.className = "t"; t.textContent = fmtDay(d) + (isEx ? " · exemple" : ""); tip.append(t);
+      ["matin", "soir"].forEach(s => { const r = data[d][s], line = document.createElement("div"); line.className = "l";
+        line.innerHTML = `<i class="sw" style="border-top-style:${s === "soir" ? "dashed" : "solid"}"></i>`; const sp = document.createElement("span");
+        sp.textContent = `${s === "matin" ? "Matin" : "Soir"} ${r ? fmtT(r.temp) + " °C" + (isOut(r.temp, z) ? " ⚠" : "") : "non relevé"}${r && !isEx ? " · " + opName(r) : ""}`; line.append(sp); tip.append(line); });
+      (entDays[d] || []).forEach(e => { const line = document.createElement("div"); line.className = "l"; line.textContent = "◆ " + (ENT[e.type] || e.type); tip.append(line); });
+      const px = x(i) * rect.width / W, tw = tip.offsetWidth;
+      tip.style.left = Math.max(0, Math.min(rect.width - tw, px - tw / 2)) + "px"; tip.style.top = "0px";
+    };
+    hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move);
+    hit.addEventListener("pointerleave", () => { tip.hidden = true; xh.setAttribute("visibility", "hidden"); });
+    const real = flat.map(r => r.temp), avg = real.length ? real.reduce((a, b) => a + b, 0) / real.length : null, outN = flat.filter(r => r.out).length;
+    statBlock($("#stats"), [["Minimum", real.length ? fmtT(Math.min(...real)) + " °C" : "—"], ["Maximum", real.length ? fmtT(Math.max(...real)) + " °C" : "—"], ["Moyenne", avg != null ? fmtT(avg) + " °C" : "—"], ["Hors plage", String(outN), outN > 0]]);
+    const strip = $("#strip"); strip.innerHTML = ""; const t = today();
+    days.forEach(d => { const c = document.createElement("div"); c.className = "cell" + (d === t ? " today" : ""); c.title = fmtDay(d) + (entDays[d] ? " · " + entDays[d].map(e => ENT[e.type]).join(", ") : "");
+      ["matin", "soir"].forEach(s => { const r = map[d][s], i = document.createElement("i"); if (r) i.className = r.out ? "out" : "ok"; c.append(i); });
+      if (entDays[d]) c.append(document.createElement("b"));
+      strip.append(c); });
+    const expected = DAYS * 2 - (!map[t].matin && new Date().getHours() < H_MATIN ? 1 : 0) - (!map[t].soir && new Date().getHours() < H_SOIR ? 1 : 0);
+    $("#completude").textContent = `${flat.length} relevés sur ${expected} attendus (${Math.round(flat.length / expected * 100)} %)`;
+  }
+  function statBlock(box, items) {
+    box.innerHTML = "";
+    items.forEach(([k, v, bad]) => { const s = document.createElement("div"); s.className = "stat"; const a = document.createElement("span"); a.className = "label"; a.textContent = k; const b = document.createElement("span"); b.className = "v"; b.textContent = v; if (bad) b.style.color = "var(--crit)"; s.append(a, b); box.append(s); });
+  }
+  let rT; new ResizeObserver(() => { clearTimeout(rT); rT = setTimeout(renderSuivi, 80); }).observe($("#chart"));
+
+  /* ---------- registre ---------- */
+  let perKind = store.get("frigo.per") === "semaine" ? "semaine" : "mois";
+  function periods(kind, z) {
+    const dates = [...zReadings(z).map(r => r.date), ...zEnts(z).map(e => e.date), today()];
+    if (kind === "mois") {
+      const ms = [...new Set(dates.map(d => d.slice(0, 7)))].sort().reverse();
+      return ms.map(mo => ({ kind, key: mo, start: mo + "-01", end: monthEnd(mo), label: fmtMonth(mo) }));
+    }
+    const ws = new Set(dates.map(weekStart)); const cur = weekStart(today()); for (let i = 0; i < 8; i++) ws.add(addDays(cur, -7 * i));
+    return [...ws].sort().reverse().map(w => ({ kind, key: w, start: w, end: addDays(w, 6), label: `Semaine du ${fmtDayShort(w)} au ${fmtDayLong(addDays(w, 6))}` }));
+  }
+  function curPeriod() { const z = zone(), ps = periods(perKind, z), v = $("#reg-period").value; return ps.find(p => p.key === v) || ps[0]; }
+  function setPer(k) { perKind = k; store.set("frigo.per", k); document.querySelectorAll("[data-per]").forEach(b => b.setAttribute("aria-pressed", b.dataset.per === k)); $("#reg-period").value = ""; renderRegistre(); }
+  document.querySelectorAll("[data-per]").forEach(b => b.onclick = () => setPer(b.dataset.per));
+  $("#reg-period").onchange = () => renderRegistre();
+  function periodData(z, p) {
+    const rs = zReadings(z).filter(r => r.date >= p.start && r.date <= p.end).sort((a, b) => a.date.localeCompare(b.date) || (a.slot === "soir") - (b.slot === "soir"));
+    const es = zEnts(z).filter(e => e.date >= p.start && e.date <= p.end).sort((a, b) => a.date.localeCompare(b.date) || a.ts - b.ts);
+    const endEff = p.end < today() ? p.end : today();
+    const expected = p.start > endEff ? 0 : daysBetween(p.start, endEff).length * 2 - (p.end >= today() ? (new Date().getHours() < H_MATIN ? 1 : 0) + (new Date().getHours() < H_SOIR ? 1 : 0) : 0);
+    const temps = rs.map(r => r.temp);
+    return { rs, es, expected: Math.max(expected, rs.length), outN: rs.filter(r => r.out).length, min: temps.length ? Math.min(...temps) : null, max: temps.length ? Math.max(...temps) : null, avg: temps.length ? temps.reduce((a, b) => a + b, 0) / temps.length : null };
+  }
+  function renderRegistre() {
+    if ($("#v-registre").hidden) return;
+    const z = zone(), ps = periods(perKind, z), sel = $("#reg-period"), keep = sel.value;
+    sel.innerHTML = ""; ps.forEach(p => { const o = document.createElement("option"); o.value = p.key; o.textContent = p.label; sel.append(o); });
+    sel.value = ps.some(p => p.key === keep) ? keep : ps[0].key;
+    const p = curPeriod(), d = periodData(z, p);
+    $("#reg-title").textContent = `Registre · ${z.nom}`;
+    statBlock($("#reg-stats"), [["Relevés faits", `${d.rs.length} / ${d.expected}`], ["Hors plage", String(d.outN), d.outN > 0], ["Min / max", d.min == null ? "—" : `${fmtT(d.min)} / ${fmtT(d.max)} °C`], ["Entretiens", String(d.es.length)]]);
+    renderValidation(z, p, d);
+    const tb = $("#h-body"); tb.innerHTML = "";
+    if (!d.rs.length) tb.innerHTML = `<tr><td colspan="9" class="muted" style="text-align:center;padding:22px">${loaded ? "Aucun relevé sur cette période." : "Chargement du registre…"}</td></tr>`;
+    d.rs.slice().reverse().forEach(r => {
+      const tr = document.createElement("tr"); if (r.out) tr.className = "out";
+      const corr = (r.corrections || []).map(c => `corrigé (avant : ${fmtT(c.temp)} °C par ${c.opNom || "?"} à ${fmtTime(c.ts)})`).join(" ; ");
+      const cells = [fmtDay(r.date), r.slot === "matin" ? "Matin" : "Soir", fmtTime(r.ts), fmtT(r.temp), fmtT(r.tmin), fmtT(r.tmax), opName(r), null, [r.raz ? "mini/maxi remis à zéro" : "", r.comment, corr].filter(Boolean).join(" — ")];
+      cells.forEach((v, i) => { const td = document.createElement("td");
+        if (i === 7) { const pl = document.createElement("span"); pl.className = "pill " + (r.out ? "crit" : r.mmOut ? "warn" : "ok"); pl.textContent = r.out ? "⚠ Hors plage" : r.mmOut ? "! Mini/maxi" : "✓ Conforme"; td.append(pl); }
+        else { td.textContent = v; if (i >= 3 && i <= 5) td.className = "num"; if (i === 8) td.className = "wrap"; }
+        tr.append(td); });
+      tb.append(tr);
+    });
+    const eb = $("#e-body"); eb.innerHTML = "";
+    if (!d.es.length) eb.innerHTML = `<tr><td colspan="5" class="muted" style="text-align:center;padding:18px">Aucun entretien enregistré sur cette période. Saisissez-les depuis « Saisir » › Entretien du frigo.</td></tr>`;
+    d.es.slice().reverse().forEach(e => {
+      const tr = document.createElement("tr");
+      [fmtDay(e.date), ENT[e.type] || e.type, e.opNom || opName(e), e.comment || ""].forEach((v, i) => { const td = document.createElement("td"); td.textContent = v; if (i === 3) td.className = "wrap"; tr.append(td); });
+      const td = document.createElement("td"); const b = document.createElement("button"); b.className = "btn danger"; b.textContent = "Supprimer"; b.style.fontSize = ".62rem";
+      let armed = false; b.onclick = () => { if (!armed) { armed = true; b.textContent = "Confirmer"; setTimeout(() => { armed = false; b.textContent = "Supprimer"; }, 4000); return; }
+        db && db.doc("entretiens/" + e.id).delete().then(() => toast("Entretien supprimé")).catch(err => toast("Refusé : " + errTxt(err))); };
+      td.append(b); tr.append(td); eb.append(tr);
+    });
+  }
+
+  function renderValidation(z, p, d) {
+    const box = $("#valid-box"); box.innerHTML = "";
+    if (p.kind !== "mois") { const a = document.createElement("p"); a.className = "muted small"; a.textContent = "La validation se fait sur le mois complet. Passez en vue « Mois » pour valider."; box.append(a); return; }
+    const v = valids.find(x => x.enc === z.id && x.mois === p.key);
+    const changed = v && [...d.rs, ...d.es].some(r => r.ts > v.ts);
+    if (v) {
+      const c = document.createElement("div"); c.className = "valid done";
+      c.innerHTML = `<div class="stamp">${ICON_STAMP}<div><h3></h3><p class="small muted"></p></div></div>`;
+      c.querySelector("h3").textContent = `Registre de ${fmtMonth(p.key)} validé`;
+      c.querySelector("p").textContent = `Par ${v.opNom || "?"} (pharmacien responsable), le ${new Date(v.ts).toLocaleDateString("fr-FR")} à ${fmtTime(v.ts)}. ${v.stats ? `${v.stats.n} relevés, ${v.stats.out} hors plage, ${v.stats.ent} entretien(s).` : ""}`;
+      if (v.comment) { const q = document.createElement("p"); q.className = "small"; q.textContent = "« " + v.comment + " »"; c.append(q); }
+      if (changed) { const w = document.createElement("div"); w.className = "alert warn small"; w.textContent = "Des saisies ont été ajoutées ou corrigées après la validation. Revalidez le mois pour couvrir ces changements."; c.append(w); }
+      box.append(c);
+      if (!changed) return;
+    }
+    const ended = p.end < today();
+    const f = document.createElement("div"); f.className = "valid todo-v";
+    if (!ended) { f.innerHTML = `<p class="small muted"></p>`; f.querySelector("p").textContent = `Le mois n'est pas terminé. La validation de ${fmtMonth(p.key)} sera possible à partir du ${fmtDayLong(addDays(p.end, 1))}.`; box.append(f); return; }
+    const ph = ops.filter(o => o.actif !== false && o.role === "pharmacien");
+    if (!ph.length) { f.innerHTML = `<p class="small">Aucun pharmacien dans l'équipe. Dans <a href="#reglages">Réglages › Équipe</a>, donnez le rôle « Pharmacien » au pharmacien responsable.</p>`; box.append(f); return; }
+    f.innerHTML = `<p class="small">Je certifie avoir relu le registre de <b></b> pour <b></b> : ${d.rs.length} relevé(s) sur ${d.expected} attendus, ${d.outN} hors plage, ${d.es.length} entretien(s).</p>
+      <div class="grid2"><label class="fld"><span class="label">Pharmacien responsable</span><select id="v-op"></select></label><label class="fld"><span class="label">Observation (facultatif)</span><input id="v-comment" placeholder="Ex. relevés manquants du 12 expliqués (fermeture)"></label></div>
+      <button class="btn primary" id="v-go" type="button">Valider le registre du mois</button>`;
+    const bs = f.querySelectorAll("b"); bs[0].textContent = fmtMonth(p.key); bs[1].textContent = z.nom;
+    const s = f.querySelector("#v-op"); ph.forEach(o => { const op = document.createElement("option"); op.value = o.id; op.textContent = o.nom; s.append(op); }); if (ph.some(o => o.id === selOp)) s.value = selOp;
+    f.querySelector("#v-go").onclick = async () => {
+      if (!db) return toast("Registre non connecté.");
+      const o = ph.find(x => x.id === s.value);
+      try { await ensureZoneDoc(z); await db.doc(`validations/${z.id}_${p.key}`).set({ enc: z.id, mois: p.key, opId: o.id, opNom: o.nom, ts: Date.now(), comment: f.querySelector("#v-comment").value.trim().slice(0, 300), stats: { n: d.rs.length, attendus: d.expected, out: d.outN, ent: d.es.length } }); toast("Registre validé"); }
+      catch (e) { toast("Validation refusée : " + errTxt(e)); }
+    };
+    box.append(f);
+  }
+
+  /* ---------- exports ---------- */
+  async function save(filename, blob) {
+    if (!dl) { toast("Le téléchargement n'est pas disponible dans cette vue."); return; }
+    try { await dl.save({ filename, data: blob }); toast("Fichier prêt"); }
+    catch (e) { if (!e || (e.code !== "dismissed" && e.code !== "cancelled")) toast("Téléchargement non effectué : " + ((e && (e.message || e.code)) || "refusé")); }
+  }
+  const fileKey = (z, p) => `${z.id}-${p.kind === "mois" ? p.key : "semaine-" + p.key}`;
+  $("#csv").onclick = () => {
+    const z = zone(), p = curPeriod(), d = periodData(z, p);
+    const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`, n = v => v == null ? "" : String(v).replace(".", ",");
+    const lines = [["Zone", "Date", "Relevé", "Heure", "Température (°C)", "Mini (°C)", "Maxi (°C)", "Mini/maxi remis à zéro", "Opérateur", "Conforme", "Commentaire", "Corrections"].map(q).join(";")];
+    d.rs.forEach(r => lines.push([z.nom, r.date, r.slot, fmtTime(r.ts), n(r.temp), n(r.tmin), n(r.tmax), r.raz ? "oui" : "", opName(r), r.out ? "NON" : "OUI", r.comment || "", (r.corrections || []).map(c => `${n(c.temp)} °C par ${c.opNom || "?"} le ${new Date(c.ts).toLocaleString("fr-FR")}`).join(" | ")].map(q).join(";")));
+    lines.push(""); lines.push(["Zone", "Date", "Entretien", "Par", "Détails"].map(q).join(";"));
+    d.es.forEach(e => lines.push([z.nom, e.date, ENT[e.type] || e.type, e.opNom || "", e.comment || ""].map(q).join(";")));
+    save(`releves-${fileKey(z, p)}.csv`, new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" }));
+  };
+
+  const latin = s => String(s ?? "").replace(/[’‘]/g, "'").replace(/[“”]/g, '"').replace(/[–—−]/g, "-").replace(/…/g, "...").replace(/œ/g, "oe").replace(/Œ/g, "OE").replace(/[⚠✓◆]/g, "").replace(/[^\x00-\xFF]/g, "");
+  function buildPdf(z, p) {
+    const J = window.jspdf && window.jspdf.jsPDF; if (!J) throw new Error("générateur PDF indisponible");
+    const d = periodData(z, p), doc = new J({ unit: "mm", format: "a4" }), M = 14, PW = 210, PH = 297;
+    let y = M;
+    const T = latin, ink = () => doc.setTextColor(26, 29, 41), mut = () => doc.setTextColor(61, 63, 74);
+    const ensure = h => { if (y + h > PH - 16) { doc.addPage(); y = M; return true; } return false; };
+    // header
+    doc.setFillColor(26, 29, 41); doc.rect(0, 0, PW, 30, "F"); doc.setFillColor(242, 118, 46); doc.rect(0, 30, PW, 1.6, "F");
+    doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(15);
+    doc.text(T("Registre des températures - " + z.nom), M, 13);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(220, 221, 224);
+    doc.text(T(`${config.pharmacie || "Pharmacie"}  ·  Plage autorisée ${rangeTxt(z)}  ·  ${p.label}`), M, 21);
+    doc.text(T(`Édité le ${new Date().toLocaleDateString("fr-FR")} à ${fmtTime(Date.now())}`), M, 26);
+    y = 40;
+    // stats
+    const st = [["Relevés faits", `${d.rs.length} / ${d.expected}`], ["Hors plage", String(d.outN)], ["Minimum", d.min == null ? "-" : fmtT(d.min) + " °C"], ["Maximum", d.max == null ? "-" : fmtT(d.max) + " °C"], ["Moyenne", d.avg == null ? "-" : fmtT(d.avg) + " °C"], ["Entretiens", String(d.es.length)]];
+    const cw = (PW - 2 * M) / st.length;
+    st.forEach(([k, v], i) => { const x0 = M + i * cw; doc.setDrawColor(224, 225, 229); doc.roundedRect(x0 + 1, y, cw - 2, 17, 2, 2, "S");
+      mut(); doc.setFontSize(7); doc.text(T(k.toUpperCase()), x0 + 4, y + 6);
+      if (k === "Hors plage" && d.outN) doc.setTextColor(196, 29, 22); else ink(); doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.text(T(v), x0 + 4, y + 13); doc.setFont("helvetica", "normal"); });
+    y += 25;
+    // chart
+    const days = daysBetween(p.start, p.end), map = byDay(days, d.rs), ch = 58, cx0 = M + 10, cw2 = PW - 2 * M - 12;
+    const vals = d.rs.map(r => r.temp), lo = Math.min(Math.floor(z.lo - 2), vals.length ? Math.floor(Math.min(...vals)) - 1 : z.lo - 2), hi = Math.max(Math.ceil(z.hi + 3), vals.length ? Math.ceil(Math.max(...vals)) + 1 : z.hi + 3);
+    const X = i => cx0 + (days.length < 2 ? cw2 / 2 : cw2 * i / (days.length - 1)), Y = v => y + ch * (1 - (v - lo) / (hi - lo));
+    ink(); doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.text(T("Courbe des températures (matin : trait plein · soir : pointillés)"), M, y); y += 4;
+    doc.setFillColor(238, 239, 241); doc.rect(cx0, Y(z.hi), cw2, Y(z.lo) - Y(z.hi), "F");
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7); mut();
+    const stp = hi - lo > 16 ? 4 : 2;
+    for (let v = Math.ceil(lo / stp) * stp; v <= hi; v += stp) { doc.setDrawColor(224, 225, 229); doc.setLineWidth(.1); doc.line(cx0, Y(v), cx0 + cw2, Y(v)); doc.text(String(v), cx0 - 2, Y(v) + 1, { align: "right" }); }
+    doc.setDrawColor(177, 178, 181); doc.setLineWidth(.3); doc.setLineDashPattern([1, 1], 0); doc.line(cx0, Y(z.lo), cx0 + cw2, Y(z.lo)); doc.line(cx0, Y(z.hi), cx0 + cw2, Y(z.hi)); doc.setLineDashPattern([], 0);
+    const lblEvery = Math.max(1, Math.ceil(days.length / 10));
+    days.forEach((dd, i) => { if (i % lblEvery === 0 || i === days.length - 1) doc.text(T(fmtDayShort(dd)), X(i), y + ch + 4, { align: "center" }); });
+    [["matin", [26, 29, 41], []], ["soir", [125, 132, 145], [1.5, 1]]].forEach(([s, c, dash]) => {
+      doc.setDrawColor(...c); doc.setLineWidth(.5); doc.setLineDashPattern(dash, 0);
+      let prev = null; days.forEach((dd, i) => { const r = map[dd][s]; if (r) { if (prev) doc.line(X(prev.i), Y(prev.v), X(i), Y(r.temp)); prev = { i, v: r.temp }; } else prev = null; });
+      doc.setLineDashPattern([], 0);
+      days.forEach((dd, i) => { const r = map[dd][s]; if (!r) return; if (r.out) doc.setFillColor(196, 29, 22); else doc.setFillColor(...c);
+        if (s === "matin") doc.circle(X(i), Y(r.temp), r.out ? 1.1 : .8, "F"); else doc.rect(X(i) - .8, Y(r.temp) - .8, 1.6, 1.6, "F"); });
+    });
+    y += ch + 10;
+    // table helper
+    function table(title, cols, rows, empty) {
+      ensure(16); ink(); doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.text(T(title), M, y); y += 3;
+      const head = () => { doc.setFillColor(244, 244, 246); doc.rect(M, y, PW - 2 * M, 6.5, "F"); mut(); doc.setFont("helvetica", "bold"); doc.setFontSize(7);
+        let x0 = M; cols.forEach(c => { doc.text(T(c.h.toUpperCase()), c.right ? x0 + c.w - 1.5 : x0 + 1.5, y + 4.4, { align: c.right ? "right" : "left" }); x0 += c.w; }); y += 6.5; doc.setFont("helvetica", "normal"); };
+      head();
+      if (!rows.length) { mut(); doc.setFontSize(8.5); doc.text(T(empty), M + 1.5, y + 5); y += 9; return; }
+      rows.forEach(row => {
+        doc.setFontSize(8);
+        const lines = row.cells.map((v, i) => doc.splitTextToSize(T(v), cols[i].w - 3));
+        const h = Math.max(...lines.map(l => l.length)) * 3.6 + 2.6;
+        if (ensure(h)) head();
+        let x0 = M; row.cells.forEach((v, i) => { if (row.red && cols[i].red) doc.setTextColor(196, 29, 22); else ink();
+          doc.text(lines[i], cols[i].right ? x0 + cols[i].w - 1.5 : x0 + 1.5, y + 3.8, { align: cols[i].right ? "right" : "left" }); x0 += cols[i].w; });
+        y += h; doc.setDrawColor(224, 225, 229); doc.setLineWidth(.1); doc.line(M, y, PW - M, y);
+      });
+      y += 6;
+    }
+    table("Relevés", [{ h: "Date", w: 24 }, { h: "Relevé", w: 13 }, { h: "Heure", w: 12 }, { h: "Temp.", w: 14, right: true, red: true }, { h: "Mini", w: 12, right: true }, { h: "Maxi", w: 12, right: true }, { h: "Opérateur", w: 28 }, { h: "Statut", w: 17, red: true }, { h: "Commentaire", w: 50 }],
+      d.rs.map(r => ({ red: r.out, cells: [fmtDay(r.date), r.slot, fmtTime(r.ts), fmtT(r.temp), fmtT(r.tmin), fmtT(r.tmax), opName(r), r.out ? "Hors plage" : r.mmOut ? "Mini/maxi" : "Conforme",
+        [r.raz ? "mini/maxi RAZ" : "", r.comment, (r.corrections || []).map(c => `corrigé (avant ${fmtT(c.temp)} °C, ${c.opNom || "?"})`).join("; ")].filter(Boolean).join(" - ")] })), "Aucun relevé sur la période.");
+    // missing
+    const endEff = p.end < today() ? p.end : addDays(today(), -1);
+    const missing = p.start > endEff ? [] : daysBetween(p.start, endEff).flatMap(dd => ["matin", "soir"].filter(s => !map[dd] || !map[dd][s]).map(s => `${fmtDayShort(dd)} ${s}`));
+    if (missing.length) { ensure(14); ink(); doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.text(T(`Relevés manquants (${missing.length})`), M, y); y += 5; doc.setFont("helvetica", "normal"); doc.setFontSize(8); mut();
+      const ls = doc.splitTextToSize(T(missing.join(", ")), PW - 2 * M); ensure(ls.length * 3.6); doc.text(ls, M, y); y += ls.length * 3.6 + 6; }
+    table("Entretiens du frigo", [{ h: "Date", w: 26 }, { h: "Intervention", w: 44 }, { h: "Par", w: 30 }, { h: "Détails", w: 82 }],
+      d.es.map(e => ({ cells: [fmtDay(e.date), ENT[e.type] || e.type, e.opNom || "", e.comment || ""] })), "Aucun entretien enregistré sur la période.");
+    // validation
+    ensure(34); ink(); doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.text(T("Validation du pharmacien responsable"), M, y); y += 5;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8.5);
+    const mo = p.kind === "mois" ? p.key : null, v = mo && valids.find(x => x.enc === z.id && x.mois === mo);
+    if (v) { doc.setTextColor(29, 115, 72); doc.text(T(`Registre de ${fmtMonth(mo)} validé par ${v.opNom} le ${new Date(v.ts).toLocaleDateString("fr-FR")} à ${fmtTime(v.ts)}.`), M, y); y += 5; if (v.comment) { mut(); doc.text(T("Observation : " + v.comment), M, y); y += 5; } }
+    else { mut(); doc.text(T(p.kind === "mois" ? "Mois non validé dans l'application à la date d'édition." : "Rapport hebdomadaire : la validation se fait sur le mois complet."), M, y); y += 5; }
+    doc.setDrawColor(177, 178, 181); doc.setLineWidth(.3); doc.roundedRect(M, y + 1, 80, 20, 2, 2, "S"); mut(); doc.setFontSize(7); doc.text(T("NOM, DATE ET SIGNATURE"), M + 3, y + 6);
+    const n = doc.getNumberOfPages();
+    for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFontSize(7); mut(); doc.text(T(`${z.nom} · ${p.label}`), M, PH - 8); doc.text(`${i} / ${n}`, PW - M, PH - 8, { align: "right" }); }
+    return doc.output("blob");
+  }
+  $("#pdf").onclick = () => { const z = zone(), p = curPeriod(); try { save(`rapport-${fileKey(z, p)}.pdf`, buildPdf(z, p)); } catch (e) { toast("PDF non généré : " + (e.message || e)); } };
+
+  /* ---------- réglages ---------- */
+  Object.entries(TYPES).forEach(([k, v]) => { const o = document.createElement("option"); o.value = k; o.textContent = v[0]; $("#z-type").append(o); });
+  for (let h = 6; h <= 20; h++) { const o = document.createElement("option"); o.value = h; o.textContent = h + " h"; $("#n-hour").append(o); }
+  let zEdit = null; // null = new zone
+  function fillZoneForm(z) {
+    zEdit = z ? z.id : null;
+    $("#z-form-title").textContent = z ? `Modifier « ${z.nom} »` : "Nouvelle zone réfrigérée";
+    $("#z-nom").value = z ? z.nom : ""; $("#z-type").value = z ? z.type : "frigo";
+    $("#z-lo").value = z ? fmtT(z.lo) : "2,0"; $("#z-hi").value = z ? fmtT(z.hi) : "8,0";
+    $("#z-del").hidden = !z || zones().length < 2; $("#z-msg").textContent = "";
+  }
+  $("#z-type").onchange = () => { const t = TYPES[$("#z-type").value]; if (!zEdit) { $("#z-lo").value = fmtT(t[1]); $("#z-hi").value = fmtT(t[2]); } };
+  $("#z-new").onclick = () => { fillZoneForm(null); $("#z-nom").focus(); };
+  $("#z-form").onsubmit = async e => {
+    e.preventDefault();
+    const msg = $("#z-msg"), nom = $("#z-nom").value.trim(), lo = num($("#z-lo").value), hi = num($("#z-hi").value);
+    if (!nom) { msg.textContent = "Donnez un nom à la zone."; return; }
+    if (lo == null || hi == null || lo >= hi) { msg.textContent = "Le minimum doit être inférieur au maximum."; return; }
+    if (!db) { msg.textContent = "Registre non connecté."; return; }
+    try {
+      const zs = zones();
+      if (zEdit) {
+        const cur = zs.find(z => z.id === zEdit) || DEFAULT_ZONE;
+        await db.doc("enceintes/" + zEdit).set({ nom: nom.slice(0, 40), type: $("#z-type").value, lo, hi, ordre: cur.ordre ?? 0, actif: true });
+        toast("Zone mise à jour");
+      } else {
+        if (zs.length === 1 && zs[0].virtual) await ensureZoneDoc(zs[0]);
+        let id = slug(nom), k = 2; while (zoneDocs.some(z => z.id === id) || id === DEFAULT_ZONE.id && zs.some(z => z.id === id)) id = slug(nom) + "-" + k++;
+        await db.doc("enceintes/" + id).set({ nom: nom.slice(0, 40), type: $("#z-type").value, lo, hi, ordre: zs.length, actif: true });
+        zoneId = id; store.set("frigo.zone", id); toast(nom + " ajoutée"); fillZoneForm({ id, nom, type: $("#z-type").value, lo, hi });
+      }
+    } catch (err) { msg.textContent = "Refusé : " + errTxt(err); }
+  };
+  $("#z-del").onclick = async () => {
+    if (!zEdit || !db) return;
+    const b = $("#z-del"); if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Confirmer le retrait"; setTimeout(() => { delete b.dataset.armed; b.textContent = "Retirer la zone"; }, 4000); return; }
+    try { await db.doc("enceintes/" + zEdit).update({ actif: false }); toast("Zone retirée (son registre est conservé)"); fillZoneForm(zones().find(z => z.id !== zEdit) || null); }
+    catch (err) { toast("Refusé : " + errTxt(err)); }
+  };
+  function renderSettings() {
+    if ($("#v-reglages").hidden) return;
+    if (document.activeElement !== $("#pharma-name")) $("#pharma-name").value = config.pharmacie || "";
+    const list = $("#zlist"); list.innerHTML = "";
+    zones().forEach(z => {
+      const r = document.createElement("div"); r.className = "lrow";
+      const m = document.createElement("div"); m.className = "main";
+      const n = document.createElement("span"); n.textContent = z.nom; n.style.fontWeight = "600";
+      const s = document.createElement("span"); s.className = "muted small"; s.textContent = `${TYPES[z.type] ? TYPES[z.type][0] : "Zone"} · plage ${rangeTxt(z)} · ${zReadings(z).length} relevé(s)`;
+      m.append(n, s);
+      const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.textContent = "Modifier"; b.onclick = () => { fillZoneForm(z); $("#z-nom").focus(); };
+      r.append(m, b); list.append(r);
+    });
+    if (zEdit === undefined || (zEdit && !zones().some(z => z.id === zEdit))) fillZoneForm(zone());
+    // notif
+    const n = config.notif || {};
+    if (!$("#notif-form").contains(document.activeElement)) {
+      $("#n-email").value = n.email || ""; $("#n-out").checked = n.horsPlage !== false; $("#n-miss").checked = !!n.manquant; $("#n-recap").checked = n.recap !== false;
+      $("#n-day").value = String(n.jour ?? 1); $("#n-hour").value = String(n.heure ?? 8);
+    }
+    const st = $("#n-status");
+    if (!n.email) st.textContent = "Aucune adresse enregistrée : aucune notification n'est envoyée.";
+    else if (envois.actif) st.textContent = `Envoi automatique actif vers ${n.email}.` + (envois.dernierRecap ? ` Dernier récapitulatif envoyé le ${new Date(envois.dernierRecap).toLocaleDateString("fr-FR")}.` : "") + (envois.derniereAlerte ? ` Dernière alerte le ${new Date(envois.derniereAlerte).toLocaleString("fr-FR")}.` : "");
+    else st.textContent = `Adresse enregistrée (${n.email}). Le service d'envoi automatique n'est pas encore branché : les e-mails partiront dès qu'il sera activé.`;
+    // qr select
+    const qs = $("#qr-zone"), keep = qs.value || zone().id; qs.innerHTML = "";
+    zones().forEach(z => { const o = document.createElement("option"); o.value = z.id; o.textContent = z.nom; qs.append(o); });
+    qs.value = zones().some(z => z.id === keep) ? keep : zone().id;
+    renderQR();
+  }
+  $("#pharma-form").onsubmit = async e => { e.preventDefault(); if (!db) return toast("Registre non connecté.");
+    try { await db.doc("config/app").set({ ...config, pharmacie: $("#pharma-name").value.trim().slice(0, 80) }); toast("Nom enregistré"); } catch (err) { toast("Refusé : " + errTxt(err)); } };
+  $("#notif-form").onsubmit = async e => {
+    e.preventDefault(); const msg = $("#n-msg"), email = $("#n-email").value.trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.style.color = "var(--crit)"; msg.textContent = "Adresse e-mail invalide."; return; }
+    if (!db) { msg.textContent = "Registre non connecté."; return; }
+    try { await db.doc("config/app").set({ ...config, notif: { email, horsPlage: $("#n-out").checked, manquant: $("#n-miss").checked, recap: $("#n-recap").checked, jour: Number($("#n-day").value), heure: Number($("#n-hour").value), modifie: Date.now() } });
+      msg.style.color = "var(--ok)"; msg.textContent = "Notifications enregistrées."; }
+    catch (err) { msg.style.color = "var(--crit)"; msg.textContent = "Refusé : " + errTxt(err); }
+  };
+  let qrFor = null;
+  function renderQR() {
+    const id = $("#qr-zone").value || zone().id, z = zones().find(x => x.id === id) || zone();
+    $("#qr-sub").textContent = `${z.nom} · Plage ${rangeTxt(z)}\nMatin et soir · Scannez pour saisir`;
+    $("#qr-sub").style.whiteSpace = "pre-line";
+    if (qrFor === z.id) return;
+    const box = $("#qrbox"); box.innerHTML = "";
+    if (typeof QRCode === "undefined") { box.textContent = "Générateur de QR code indisponible."; return; }
+    new QRCode(box, { text: `${APP_URL}#saisie-${z.id}`, width: 400, height: 400, colorDark: "#1a1d29", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
+    qrFor = z.id;
+  }
+  $("#qr-zone").onchange = renderQR;
+  $("#qr-dl").onclick = async () => {
+    const src = $("#qrbox canvas"); if (!src) return; const z = zones().find(x => x.id === qrFor) || zone();
+    const c = document.createElement("canvas"); c.width = 600; c.height = 780; const g = c.getContext("2d");
+    g.fillStyle = "#fff"; g.fillRect(0, 0, 600, 780); g.fillStyle = "#f2762e"; g.fillRect(0, 0, 600, 12); g.fillStyle = "#1a1d29"; g.textAlign = "center";
+    g.font = "800 40px 'Albert Sans', Arial, sans-serif"; g.fillText("Relevé température", 300, 70);
+    g.drawImage(src, 100, 110, 400, 400);
+    g.font = "700 30px 'Albert Sans', Arial, sans-serif"; g.fillText(latin(z.nom), 300, 580);
+    g.fillStyle = "#3d3f4a"; g.font = "24px 'Albert Sans', Arial, sans-serif"; g.fillText("Plage " + rangeTxt(z) + " · matin et soir", 300, 625); g.fillText("Scannez pour saisir le relevé", 300, 662);
+    const blob = await new Promise(r => c.toBlob(r, "image/png"));
+    save(`qr-${z.id}.png`, blob);
+  };
+
+  /* ---------- render all ---------- */
+  function renderAll() {
+    renderZones(); renderTodo(); renderOps(); renderScale(); onTemp(); checkDup(); renderSuivi(); renderRegistre(); renderSettings();
+  }
+  function tick() { const n = new Date(); $("#nowlbl").textContent = n.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) + " · " + fmtTime(n); }
+  tick(); setInterval(() => { tick(); renderTodo(); if (!$("#v-suivi").hidden) renderToday(zone()); }, 60000);
+  zEdit = undefined;
+  setMode("temp"); setSlot(selSlot); setPer(perKind); route();
+
+  /* ---------- connect ---------- */
+  (async () => {
+    const C = window.claude;
+    if (!C || !C.use) { setLive(false, "Hors ligne"); return; }
+    C.use("downloads").then(d => dl = d).catch(() => {});
+    C.use("user").then(u => userApi = u).catch(() => {});
+    db = await C.use("db").catch(() => null);
+    if (!db) { setLive(false, "Connectez-vous pour accéder au registre"); $("#form-msg").textContent = "Connectez-vous à votre compte pour enregistrer un relevé."; return; }
+    const need = new Set(["operateurs", "releves", "enceintes", "entretiens", "validations", "config"]);
+    const timer = setTimeout(() => { if (need.size) setLive(false, "Registre injoignable, vérifiez la connexion"); }, 10000);
+    const got = k => { need.delete(k); if (!need.size && !loaded) { loaded = true; clearTimeout(timer); setLive(true, window.__STANDALONE__ && !window.__REMOTE__ ? "Enregistré sur cet appareil" : "Registre synchronisé"); } renderAll(); };
+    const fail = e => setLive(false, "Erreur : " + ((e && e.message) || "connexion"));
+    db.collection("operateurs").onSnapshot(s => { ops = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(o => typeof o.nom === "string"); got("operateurs"); }, fail);
+    db.collection("enceintes").onSnapshot(s => { zoneDocs = s.docs.map(d => ({ id: d.id, ...d.data() })); qrFor = null; got("enceintes"); }, fail);
+    db.collection("entretiens").onSnapshot(s => { ents = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(e => /^\d{4}-\d\d-\d\d$/.test(e.date || "")); got("entretiens"); }, fail);
+    db.collection("validations").onSnapshot(s => { valids = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(v => typeof v.mois === "string"); got("validations"); }, fail);
+    db.collection("config").onSnapshot(s => { const a = s.docs.find(d => d.id === "app"), b = s.docs.find(d => d.id === "envois"); config = a ? a.data() || {} : {}; envois = b ? b.data() || {} : {}; got("config"); }, fail);
+    db.collection("releves").orderBy("ts", "desc").limit(1000).onSnapshot(s => {
+      readings = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => typeof r.temp === "number" && /^\d{4}-\d\d-\d\d$/.test(r.date || "") && (r.slot === "matin" || r.slot === "soir"));
+      got("releves");
+    }, e => { clearTimeout(timer); fail(e); });
+  })();
+})();
+</script>
+</body>
+</html>
